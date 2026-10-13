@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elliptic-Curve Scalar Multiplication & Statistical Analysis | Ethereum secp256k1</title>
+  <meta name="description"
+    content="Interactive demonstration of elliptic-curve public-key generation (Q = kG), the Double-and-Add scalar multiplication technique, and comprehensive statistical exploration for secp256k1.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Elliptic-Curve Scalar Multiplication Lab</h1>
+          <p class="subtitle">Private Key <span class="math-sym">k</span> → Public Key <span class="math-sym">Q =
+              kG</span> in Ethereum (secp256k1)</p>
+        </div>
+      </div>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="#section-scalar-mult" class="nav-pill active">1. Point Multiplication</a>
+        <a href="#section-double-add" class="nav-pill">2. Double-and-Add</a>
+        <a href="#section-statistics" class="nav-pill">3. Statistical Exploration</a>
+        <a href="#section-discussion" class="nav-pill">4. Cryptographic Analysis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- HERO / CONTEXT BANNER -->
+    <section class="context-banner">
+      <div class="banner-card">
+        <div class="banner-badge">HMWK 1 — Public-Key Cryptography in Ethereum</div>
+        <h2>One-Way Functions & The Elliptic Curve Discrete Logarithm Problem (ECDLP)</h2>
+        <p>
+          Elliptic-curve scalar multiplication is a fundamental cryptographic <strong>one-way function</strong>.
+          Given a private scalar key <span class="code-pill">k</span> and a standardized base generator point <span
+            class="code-pill">G</span>,
+          calculating the public key <span class="code-pill">Q = kG</span> is computationally straightforward.
+          However, determining <span class="code-pill">k</span> given only <span class="code-pill">Q</span> and <span
+            class="code-pill">G</span>
+          is computationally infeasible for large cryptographic fields (the <strong>ECDLP</strong>).
+        </p>
+        <div class="banner-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Curve Family</span>
+            <span class="meta-val">secp256k1 : y² = x³ + 7</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Homework Toy Field</span>
+            <span class="meta-val">y² ≡ x³ + 7 (mod 17)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Toy Base Point</span>
+            <span class="meta-val">G = (1, 5)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Target Toy Key</span>
+            <span class="meta-val">k = 6 → Q = (5, 8)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: POINT MULTIPLICATION VISUALIZER -->
+    <section id="section-scalar-mult" class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Section 1</div>
+        <h2 class="section-title">Elliptic Curve Point Multiplication Visualizer</h2>
+        <p class="section-desc">
+          Visualize how repeated point addition <span class="math-sym">Q = kG = G + G + ... + G</span> generates a
+          public key on the secp256k1 curve.
+          Toggle between the continuous real curve <span class="math-sym">ℝ</span> (chord & tangent geometry) and the
+          finite field <span class="math-sym">𝔽₁₇</span> (discrete modular arithmetic).
+        </p>
+      </div>
+
+      <div class="control-panel">
+        <div class="control-row">
+          <div class="control-item">
+            <label for="curve-mode-select">View / Domain Mode</label>
+            <select id="curve-mode-select" class="custom-select">
+              <option value="finite" selected>Finite Field 𝔽₁₇ : y² ≡ x³ + 7 (mod 17) [Homework Spec]</option>
+              <option value="real">Continuous Curve ℝ : y² = x³ + 7 [Geometric Chord/Tangent]</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="point-select">Base Point G</label>
+            <select id="point-select" class="custom-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="scalar-k-select">Private Key (k)</label>
+            <select id="scalar-k-select" class="custom-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <div class="control-item playback-controls">
+            <label>Multiplication Playback</label>
+            <div class="btn-group">
+              <button id="btn-step-prev" class="btn btn-secondary" title="Step Back" aria-label="Step Back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 12H5m7 7l-7-7 7-7" />
+                </svg>
+                Prev
+              </button>
+              <button id="btn-play-pause" class="btn btn-primary" title="Play or Pause Animation">
+                <svg id="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <span id="label-play">Animate</span>
+              </button>
+              <button id="btn-step-next" class="btn btn-secondary" title="Step Next" aria-label="Step Next">
+                Next
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M5 12h14m-7 7l7-7-7-7" />
+                </svg>
+              </button>
+              <button id="btn-reset-mult" class="btn btn-ghost" title="Reset">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-subrow">
+          <div class="speed-control">
+            <label for="anim-speed">Animation Speed:</label>
+            <input type="range" id="anim-speed" min="300" max="2000" step="100" value="900" class="custom-slider">
+            <span id="speed-label">0.9s</span>
+          </div>
+          <div class="status-summary" id="multiplication-status-text">
+            Ready: Computing 6G from G = (1, 5)
+          </div>
+        </div>
+      </div>
+
+      <div class="mult-workbench-grid">
+        <!-- Canvas Visualizer Card -->
+        <div class="workbench-card canvas-card">
+          <div class="card-toolbar">
+            <div class="toolbar-title" id="canvas-view-badge">Finite Field 𝔽₁₇ Lattice Plane</div>
+            <div class="canvas-legend">
+              <span class="legend-item"><span class="dot dot-g"></span> Base Point G</span>
+              <span class="legend-item"><span class="dot dot-curr"></span> Active Step iG</span>
+              <span class="legend-item"><span class="dot dot-target"></span> Public Key Q = kG</span>
+              <span class="legend-item"><span class="dot dot-curve"></span> Curve Points</span>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="curve-canvas" width="700" height="520"></canvas>
+            <div id="canvas-tooltip" class="canvas-tooltip" style="display: none;"></div>
+          </div>
+        </div>
+
+        <!-- Math & Key Pair Status Card -->
+        <div class="workbench-card status-card">
+          <div class="key-summary-box">
+            <h3 class="box-title">Cryptographic Key Pair</h3>
+            <div class="key-pair-display">
+              <div class="key-pill private-key">
+                <div class="key-icon">🔒</div>
+                <div class="key-data">
+                  <span class="key-type">PRIVATE KEY (k)</span>
+                  <span class="key-value" id="display-priv-key">6</span>
+                  <span class="key-hint">Secret scalar (wallet seed)</span>
+                </div>
+              </div>
+              <div class="key-arrow">➔</div>
+              <div class="key-pill public-key">
+                <div class="key-icon">🌐</div>
+                <div class="key-data">
+                  <span class="key-type">PUBLIC KEY (Q = kG)</span>
+                  <span class="key-value" id="display-pub-key">(5, 8)</span>
+                  <span class="key-hint">Public point on curve</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-math-box">
+            <div class="math-box-header">
+              <h4>Active Step Calculation</h4>
+              <span class="step-badge" id="math-step-badge">Step 1 of 6</span>
+            </div>
+            <div class="math-content" id="math-explanation">
+              <!-- Dynamically populated with step equations -->
+            </div>
+          </div>
+
+          <div class="sequence-list-box">
+            <h4>Multiplication Sequence: G, 2G, ..., kG</h4>
+            <div class="sequence-table-container">
+              <table class="data-table" id="table-multiplication-sequence">
+                <thead>
+                  <tr>
+                    <th>Multiplier</th>
+                    <th>Point Coordinates (x, y)</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody id="sequence-tbody">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: ADD AND MULTIPLY (DOUBLE-AND-ADD) FOR LARGE SCALARS -->
+    <section id="section-double-add" class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Section 2</div>
+        <h2 class="section-title">Fast Computation: The "Double-and-Add" Technique</h2>
+        <p class="section-desc">
+          How Ethereum and Bitcoin compute <span class="math-sym">kG</span> for astronomical 256-bit scalars.
+          Naive point addition takes <span class="math-sym">O(k)</span> operations, which is physically impossible for
+          <span class="math-sym">k ≈ 2²⁵⁶</span>.
+          The Double-and-Add (binary exponentiation) technique computes <span class="math-sym">kG</span> in just <span
+            class="math-sym">O(log₂ k)</span> group operations!
+        </p>
+      </div>
+
+      <div class="double-add-workbench">
+        <div class="algo-controls-card">
+          <div class="algo-inputs">
+            <div class="input-block">
+              <label for="large-k-preset">Preset Scalar Key (k)</label>
+              <select id="large-k-preset" class="custom-select">
+                <option value="6">k = 6 [Homework Toy Value: binary 110₂]</option>
+                <option value="25">k = 25 [binary 11001₂]</option>
+                <option value="42" selected>k = 42 [binary 101010₂]</option>
+                <option value="105">k = 105 [binary 1101001₂]</option>
+                <option value="1337">k = 1337 [binary 10100111001₂]</option>
+                <option value="65537">k = 65537 [Fermat Prime: binary 10000000000000001₂]</option>
+                <option value="custom">Custom Scalar Value...</option>
+              </select>
+            </div>
+
+            <div class="input-block" id="custom-k-wrapper" style="display: none;">
+              <label for="custom-k-input">Enter Custom k (Positive Integer)</label>
+              <input type="number" id="custom-k-input" min="1" max="1000000000" value="42" class="custom-input">
+            </div>
+
+            <div class="input-block">
+              <label for="algo-base-point">Base Generator Point</label>
+              <input type="text" id="algo-base-point" value="G = (1, 5) on y² ≡ x³ + 7 (mod 17)" disabled
+                class="custom-input disabled-input">
+            </div>
+
+            <div class="input-block btn-block">
+              <label>&nbsp;</label>
+              <div class="btn-group">
+                <button id="btn-algo-reset" class="btn btn-secondary">Reset</button>
+                <button id="btn-algo-step" class="btn btn-primary">Step Forward</button>
+                <button id="btn-algo-autorun" class="btn btn-accent">Run All</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Binary bit representation display -->
+          <div class="binary-strip-container">
+            <div class="binary-label">
+              <span>Binary Expansion of k = <strong id="bin-decimal-k">42</strong>:</span>
+              <span class="mono-tag" id="bin-length-tag">6 bits</span>
+            </div>
+            <div class="binary-bits" id="binary-bits-strip">
+              <!-- Dynamically populated bit chips -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Complexity Comparison Metric Banner -->
+        <div class="complexity-comparison-grid">
+          <div class="comp-card naive-comp">
+            <div class="comp-badge">Naive Method (Sequential Addition)</div>
+            <div class="comp-big-stat" id="stat-naive-ops">41 additions</div>
+            <p class="comp-formula">Complexity: <code>O(k)</code></p>
+            <p class="comp-desc">Computes G + G + G + ... requires (k - 1) full group additions. Completely infeasible
+              for 256-bit cryptography.</p>
+          </div>
+
+          <div class="comp-card fast-comp">
+            <div class="comp-badge-fast">Double-and-Add (Binary Method)</div>
+            <div class="comp-big-stat text-emerald" id="stat-fast-ops">8 operations</div>
+            <p class="comp-formula">Complexity: <code>O(log₂ k)</code></p>
+            <p class="comp-desc" id="stat-fast-breakdown">5 Doublings + 3 Additions = 8 total group operations.</p>
+          </div>
+
+          <div class="comp-card eth-comp">
+            <div class="comp-badge-eth">Ethereum secp256k1 (256-Bit Key)</div>
+            <div class="comp-big-stat text-cyan">~384 ops</div>
+            <p class="comp-formula">Naive: <code>2²⁵⁶ ≈ 1.15 × 10⁷⁷</code> steps</p>
+            <p class="comp-desc">A naive computer doing 1 trillion adds/sec would take 3.6 × 10⁵⁷ years. Double-and-Add
+              finishes in microseconds!</p>
+          </div>
+        </div>
+
+        <!-- Execution Stepper Table & Output -->
+        <div class="algo-execution-card">
+          <div class="algo-exec-header">
+            <h3>Algorithm Trace & Accumulator State</h3>
+            <div class="algo-result-pill" id="algo-result-pill">Result R = (12, 1) = 42G ≡ 6G = (5, 8)</div>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="table-algo-trace">
+              <thead>
+                <tr>
+                  <th>Step</th>
+                  <th>Bit Index (MSB)</th>
+                  <th>Bit Value</th>
+                  <th>Operation Performed</th>
+                  <th>Mathematical Action</th>
+                  <th>Accumulator Point R</th>
+                </tr>
+              </thead>
+              <tbody id="algo-trace-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: STATISTICAL EXPLORATION -->
+    <section id="section-statistics" class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Section 3</div>
+        <h2 class="section-title">Statistical Exploration & Empirical Properties</h2>
+        <p class="section-desc">
+          Empirical evaluation of the points generated by scalar multiplication <span class="math-sym">Q = kG</span>.
+          We investigate coordinate distributions, bit uniformity, input-output correlation, and avalanche-like
+          sensitivity across different field sizes.
+        </p>
+      </div>
+
+      <div class="stats-config-bar">
+        <div class="config-grid">
+          <div class="config-col">
+            <label for="stats-field-select">Finite Field Modulus (p)</label>
+            <select id="stats-field-select" class="custom-select">
+              <option value="17" selected>𝔽₁₇ (p = 17) [Homework Toy Curve, Subgroup Order = 9 or 18]</option>
+              <option value="97">𝔽₉₇ (p = 97) [Order = 79 Prime Group: Rich Uniformity Sample]</option>
+              <option value="257">𝔽₂₅₇ (p = 257) [Order = 258 Large Field: Cryptographic Scale Sample]</option>
+            </select>
+          </div>
+
+          <div class="config-col">
+            <label for="stats-base-select">Generator Point G</label>
+            <select id="stats-base-select" class="custom-select">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="config-col">
+            <label for="stats-sample-range">Key Range k ∈ [1, N]</label>
+            <div class="range-inline">
+              <input type="range" id="stats-sample-range" min="9" max="78" value="9" class="custom-slider">
+              <span id="stats-sample-count-badge" class="count-badge">N = 9</span>
+            </div>
+          </div>
+
+          <div class="config-col btn-col">
+            <label>&nbsp;</label>
+            <button id="btn-recompute-stats" class="btn btn-primary">Recompute Statistics</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Statistical Summary KPI Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Sample Points Computed</div>
+          <div class="kpi-value text-indigo" id="kpi-sample-count">9 points</div>
+          <div class="kpi-sub" id="kpi-subgroup-info">Subgroup Order: 9</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Coordinate Entropy</div>
+          <div class="kpi-value text-emerald" id="kpi-entropy">3.17 bits</div>
+          <div class="kpi-sub">Max theoretical: log₂(p) bits</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Pearson Correlation r(k, x)</div>
+          <div class="kpi-value text-cyan" id="kpi-correlation">-0.048</div>
+          <div class="kpi-sub">Near 0 indicates no linear correlation</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Avg Bit Hamming Weight</div>
+          <div class="kpi-value text-amber" id="kpi-hamming">48.6%</div>
+          <div class="kpi-sub">Ideal random target: 50.0%</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">Chi-Square Uniformity p-val</div>
+          <div class="kpi-value text-violet" id="kpi-chisq">p = 0.642</div>
+          <div class="kpi-sub">Uniform distribution hypothesis accepted</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="charts-master-grid">
+        <!-- Chart 1: 2D Spatial Scatter -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <h4>1. 2D Coordinate Scatter (x vs y over 𝔽ₚ × 𝔽ₚ)</h4>
+            <span class="chart-tag">Spatial Dispersion</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-scatter-canvas" width="460" height="300"></canvas>
+          </div>
+          <div class="chart-footnote">
+            Distribution of affine points (x, y). Note the characteristic symmetry y ↔ p - y for each valid x.
+          </div>
+        </div>
+
+        <!-- Chart 2: Coordinate Histograms -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <h4>2. Marginal Frequency of x and y Coordinates</h4>
+            <span class="chart-tag">Uniformity Test</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-hist-canvas" width="460" height="300"></canvas>
+          </div>
+          <div class="chart-footnote">
+            Frequency of individual values across coordinate space. Notice how x values have at most 2 solutions for y.
+          </div>
+        </div>
+
+        <!-- Chart 3: Input vs Output Correlation -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <h4>3. Input Key (k) vs Output Coordinate (x)</h4>
+            <span class="chart-tag">Linearity Check</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-corr-canvas" width="460" height="300"></canvas>
+          </div>
+          <div class="chart-footnote">
+            Scatter of private scalar k vs x-coordinate of kG. Lack of slope demonstrates algebraic pseudo-randomness.
+          </div>
+        </div>
+
+        <!-- Chart 4: Avalanche & Sensitivity -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <h4>4. Consecutive Delta & Bit Difference |Δx|</h4>
+            <span class="chart-tag">Avalanche Sensitivity</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-avalanche-canvas" width="460" height="300"></canvas>
+          </div>
+          <div class="chart-footnote">
+            Coordinate distance |x_{(k+1)G} - x_{kG}| across successive keys. Stepping k by 1 scatters points across the
+            field.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: CRYPTOGRAPHIC DISCUSSION & ESSAY -->
+    <section id="section-discussion" class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Section 4</div>
+        <h2 class="section-title">Cryptographic Discussion: One-Way Functions vs Hash Functions</h2>
+        <p class="section-desc">
+          Rigorous analysis answering the core assignment inquiry:
+          <em>"Discuss which of these properties are meaningful for a cryptographic one-way function and which are
+            properties specifically associated with cryptographic hash functions."</em>
+        </p>
+      </div>
+
+      <div class="discussion-container">
+        <article class="discussion-card">
+          <div class="essay-section">
+            <h3 class="essay-heading">
+              <span class="heading-num">1</span>
+              The Fundamental Distinction: Group Homomorphism vs Algebraic Destruction
+            </h3>
+            <p>
+              Both <strong>elliptic-curve scalar multiplication</strong> (<span class="math-sym">k ↦ kG</span>) and
+              <strong>cryptographic hash functions</strong> (e.g., Keccak-256 in Ethereum, SHA-256 in Bitcoin)
+              serve as <em>one-way functions</em>: computing the output in the forward direction is tractable,
+              while reversing the operation is computationally infeasible.
+            </p>
+            <p>
+              However, their mathematical objectives and underlying algebraic structures are fundamentally diametric:
+            </p>
+            <div class="contrast-callout">
+              <div class="contrast-box ec-box">
+                <h4>Elliptic Curve Scalar Multiplication (k ↦ kG)</h4>
+                <p>
+                  <strong>Preserves Algebraic Homomorphism:</strong> Scalar multiplication is an additive group
+                  homomorphism:
+                </p>
+                <div class="math-block">
+                  (k₁ + k₂)G = k₁G + k₂G \quad \text{and} \quad (a \cdot b)G = a(bG) = b(aG)
+                </div>
+                <p>
+                  This algebraic structure is <em>essential</em>. It enables Diffie-Hellman key exchange (ECDH),
+                  digital signatures (ECDSA, Schnorr), signature aggregation (BLS), and zero-knowledge proofs
+                  (zk-SNARKs).
+                </p>
+              </div>
+
+              <div class="contrast-box hash-box">
+                <h4>Cryptographic Hash Functions (H: {0,1}* → {0,1}²⁵⁶)</h4>
+                <p>
+                  <strong>Destroys All Algebraic Relations:</strong> A hash function is modeled as a <em>Random
+                    Oracle</em>.
+                </p>
+                <div class="math-block">
+                  H(m₁ \parallel m₂) \neq H(m₁) + H(m₂) \quad \text{and} \quad H(m + 1) \perp H(m)
+                </div>
+                <p>
+                  Any preserved linearity or algebraic homomorphism in a hash function is considered a
+                  <strong>catastrophic vulnerability</strong>
+                  (enabling length-extension attacks, multi-collision forgery, and linear cryptanalysis).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="essay-section">
+            <h3 class="essay-heading">
+              <span class="heading-num">2</span>
+              Detailed Property-by-Property Breakdown
+            </h3>
+
+            <div class="properties-analysis-list">
+              <div class="prop-item">
+                <div class="prop-badge meaningful-ec">Meaningful for EC One-Way Functions</div>
+                <h4>1. Apparent Uniformity & Coordinate Dispersion across the Field</h4>
+                <p>
+                  <strong>Why it matters for EC:</strong> The discrete points <span class="math-sym">kG</span> must be
+                  uniformly distributed
+                  across the cyclic subgroup without statistical clustering. If public keys clustered within specific
+                  coordinate sub-ranges,
+                  adversaries could reduce the search space in Pollard’s rho or Baby-step Giant-step algorithms.
+                </p>
+                <p>
+                  <strong>Why it matters for Hash Functions:</strong> Hash outputs must be uniformly distributed across
+                  the entire 256-bit digest space
+                  to ensure the full <span class="math-sym">2²⁵⁶</span> preimage resistance and <span
+                    class="math-sym">2¹²⁸</span> collision resistance (birthday paradox).
+                </p>
+              </div>
+
+              <div class="prop-item">
+                <div class="prop-badge meaningful-ec">Meaningful for EC One-Way Functions</div>
+                <h4>2. Zero Linear Correlation Between Input (k) and Output Coordinates (x, y)</h4>
+                <p>
+                  <strong>Why it matters for EC:</strong> There must be no low-degree polynomial mapping or linear
+                  correlation between scalar <span class="math-sym">k</span>
+                  and the resulting coordinates <span class="math-sym">(x, y)</span>. If a correlation existed, an
+                  observer could predict significant bits
+                  of private key <span class="math-sym">k</span> from public key <span class="math-sym">Q</span>.
+                  Modular squaring and modular inversion
+                  ensure the coordinate mapping appears pseudo-random.
+                </p>
+              </div>
+
+              <div class="prop-item">
+                <div class="prop-badge specific-hash">Specifically Associated with Hash Functions</div>
+                <h4>3. Strict Avalanche Criterion (SAC)</h4>
+                <p>
+                  <strong>In Hash Functions:</strong> Changing a single bit in the input message must cause every output
+                  bit to flip with an independent
+                  probability of exactly 50%. This is achieved through multiple rounds of non-linear S-boxes, bitwise
+                  rotations, and XOR mixing (e.g., Keccak's θ, ρ, π, χ, ι permutations).
+                </p>
+                <p>
+                  <strong>In Elliptic Curves:</strong> Does EC multiplication possess SAC?
+                  At the <em>group level</em>, NO: flipping a bit in <span class="math-sym">k</span> (e.g. from <span
+                    class="math-sym">k</span> to <span class="math-sym">k + 2ⁱ</span>)
+                  results in <span class="math-sym">Q' = Q + 2ⁱG</span>, which is a mathematically precise, linear
+                  offset!
+                  However, at the <em>coordinate bit level</em>, because <span class="math-sym">x</span> and <span
+                    class="math-sym">y</span> are computed through
+                  modular division and field polynomials, the binary representations of <span class="math-sym">x</span>
+                  and <span class="math-sym">y</span> exhibit
+                  an pseudo-avalanche effect that masks this algebraic relation from naive bit inspection.
+                </p>
+              </div>
+
+              <div class="prop-item">
+                <div class="prop-badge specific-hash">Specifically Associated with Hash Functions</div>
+                <h4>4. Variable Input Length & Compression Property</h4>
+                <p>
+                  <strong>In Hash Functions:</strong> A hash function maps arbitrary variable-length inputs <span
+                    class="math-sym">{0, 1}*</span> to a fixed-length digest <span class="math-sym">{0, 1}²⁵⁶</span>.
+                  This irreversible compression is inherently lossy (pigeonhole principle).
+                </p>
+                <p>
+                  <strong>In Elliptic Curves:</strong> Scalar multiplication is a <em>bijection / group isomorphism</em>
+                  from <span class="math-sym">ℤₙ</span> to the subgroup <span class="math-sym">⟨G⟩</span>.
+                  There is no compression: every distinct private key <span class="math-sym">k ∈ [1, n-1]</span> maps to
+                  a unique public key <span class="math-sym">Q</span>.
+                </p>
+              </div>
+
+              <div class="prop-item">
+                <div class="prop-badge specific-hash">Specifically Associated with Hash Functions</div>
+                <h4>5. Collision Resistance Over Arbitrary Domain</h4>
+                <p>
+                  <strong>In Hash Functions:</strong> It must be computationally impossible to find any two inputs <span
+                    class="math-sym">m₁ ≠ m₂</span> such that <span class="math-sym">H(m₁) = H(m₂)</span>.
+                </p>
+                <p>
+                  <strong>In Elliptic Curves:</strong> Since <span class="math-sym">k ↦ kG</span> is an isomorphism on
+                  <span class="math-sym">ℤₙ</span>,
+                  collisions cannot occur for <span class="math-sym">k < n</span>. Any modular wrap <span
+                        class="math-sym">(k + n)G = kG</span> is an expected cyclic group identity, not an accidental
+                      collision.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side-by-side comparison matrix table -->
+          <div class="essay-section">
+            <h3 class="essay-heading">
+              <span class="heading-num">3</span>
+              Comprehensive Comparison Matrix: EC Multiplication vs Hash Functions
+            </h3>
+            <div class="table-container">
+              <table class="data-table comp-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Cryptographic Property</th>
+                    <th>EC Scalar Multiplication (k ↦ kG)</th>
+                    <th>Cryptographic Hash Function (Keccak-256)</th>
+                    <th>Significance Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Hardness Basis</strong></td>
+                    <td>Elliptic Curve Discrete Log Problem (ECDLP)</td>
+                    <td>Sponge construction / non-linear pseudo-random permutation</td>
+                    <td>Foundational Hardness</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Domain & Codomain</strong></td>
+                    <td>ℤₙ → E(𝔽ₚ) (Fixed finite cyclic group)</td>
+                    <td>{0, 1}* → {0, 1}²⁵⁶ (Arbitrary length to fixed digest)</td>
+                    <td>Mapping Type</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Homomorphism</strong></td>
+                    <td><span class="badge badge-success">Preserved: (a+b)G = aG + bG</span></td>
+                    <td><span class="badge badge-danger">Strictly Forbidden / Destroyed</span></td>
+                    <td>Algebraic Structure</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Primary Cryptographic Role</strong></td>
+                    <td>Public key generation, Key exchange (ECDH), Digital signatures</td>
+                    <td>Data integrity, Ethereum addresses, Merkle trees, Commitments</td>
+                    <td>Protocol Utility</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Input-Output Correlation</strong></td>
+                    <td>Zero linear correlation across coordinates</td>
+                    <td>Zero linear / non-linear correlation</td>
+                    <td>Shared Requirement</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Avalanche Effect (SAC)</strong></td>
+                    <td>Coordinate bits appear pseudo-random; group element is linear</td>
+                    <td>Strict bit-level diffusion (50% flip probability)</td>
+                    <td>Hash-Specific Property</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Invertibility</strong></td>
+                    <td>O(√n) via Pollard’s rho (~2¹²⁸ for secp256k1)</td>
+                    <td>O(2²⁵⁶) brute force preimage search</td>
+                    <td>One-Way Asymmetry</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ethereum Application</strong></td>
+                    <td>Generating Ethereum Public Key from Private Key</td>
+                    <td>address = Keccak256(Q)[12..31]</td>
+                    <td>Ethereum Pipeline</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Academic Synthesis Card -->
+          <div class="synthesis-card">
+            <h4>Summary Conclusion</h4>
+            <p>
+              In summary, while both constructs exhibit empirical one-way behavior and pseudo-random output
+              distributions,
+              <strong>uniformity of coordinates</strong> and <strong>absence of input-output correlation</strong> are
+              critical for protecting
+              the Discrete Logarithm Problem from algebraic and statistical attacks. Conversely, properties such as the
+              <strong>Strict Avalanche Criterion (SAC)</strong>, <strong>lossy compression</strong>, and
+              <strong>algebraic structure destruction</strong>
+              belong exclusively to cryptographic hash functions. Public-key cryptography intrinsically relies on the
+              preservation
+              of group homomorphisms that hash functions are explicitly designed to eliminate.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <p><strong>HMWK 1 Statistics Assignment: Public-Key Cryptography in Ethereum</strong></p>
+        <p>Curve: <code>secp256k1 (y² = x³ + 7)</code> | Modulus:
+          <code>p = 17 (Toy) / 2²⁵⁶ - 2³² - 977 (Standard)</code></p>
+      </div>
+      <div class="footer-credits">
+        <span>Prepared for Statistics & Cryptography Coursework</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
