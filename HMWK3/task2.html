@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 2: Statistical Cryptanalysis of the Caesar Cipher | HMWK 3</title>
+  <meta name="description"
+    content="Statistical cryptanalysis laboratory for cracking the Caesar cipher across languages and variable text lengths using the Chi-squared test, Cross-correlation, Argmax frequency matching, and Monte Carlo benchmarking.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="task2.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Task 2: Caesar Cryptanalysis</h1>
+          <p class="subtitle">Statistical Key Recovery & Empirical Benchmarking</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-pill home-btn">← Home Hub</a>
+        <a href="task1.html" class="nav-pill">Task 1: Dual Encryption</a>
+        <a href="task2.html" class="nav-pill active">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html" class="nav-pill">Task 3: ECC Key Recovery</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Context Banner -->
+    <section class="context-banner">
+      <div class="banner-card">
+        <div class="banner-badge">HMWK 3 — Task 2 : Statistical Cryptanalysis & Sample Length Analysis</div>
+        <h2>Exploiting Plaintext Redundancy to Recover Caesar's Shift Key</h2>
+        <p>
+          Natural language is highly non-uniform and redundant: in English, the letter <strong>E</strong> occurs with
+          probability ~12.7%, while <strong>Z</strong> occurs with probability ~0.07%. Because the Caesar cipher applies
+          a deterministic cyclic translation <span class="code-pill">Cᵢ ≡ (Pᵢ + k) mod 26</span>, it completely preserves
+          this relative frequency profile, shifting it by exactly <span class="code-pill">k</span> positions.
+          This laboratory demonstrates how to automatically recover the secret shift key using the <strong>Chi-squared
+            Goodness-of-Fit test</strong>, <strong>Frequency Cross-Correlation</strong>, and <strong>Argmax Peak
+            Matching</strong> across ciphertexts of varying lengths.
+        </p>
+
+        <div class="banner-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Primary Metric</span>
+            <span class="meta-val">Chi-Squared: χ² = Σ (O_c - E_c)² / E_c</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Secondary Metric</span>
+            <span class="meta-val">Cross-Correlation: Score = f · p_ref</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Diagnostic Tool</span>
+            <span class="meta-val">Index of Coincidence (IoC ≈ 0.0667)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Theoretical Unicity</span>
+            <span class="meta-val">U ≈ 1.5–2 chars (Empirical: ~25 chars)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: INTERACTIVE WORKBENCH -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Interactive Laboratory</div>
+        <h2 class="section-title">Cryptanalysis Workbench & Live Attack Inspector</h2>
+        <p class="section-desc">
+          Configure a known language, select a text length, and adjust the secret shift key.
+          Watch the three statistical attack algorithms attempt to crack the ciphertext in real time.
+        </p>
+      </div>
+
+      <div class="workbench-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Target Configuration</span>
+          </div>
+
+          <div class="input-item">
+            <label for="lang-select">Reference Language & Frequency Profile</label>
+            <select id="lang-select" class="custom-select">
+              <option value="english" selected>English (Top letter 'E' ~12.7%, IoC ~0.0667)</option>
+              <option value="italian">Italian (Top letter 'E' ~11.8%, 'A' ~11.7%, IoC ~0.0738)</option>
+              <option value="spanish">Spanish (Top letter 'E' ~13.7%, 'A' ~12.5%, IoC ~0.0770)</option>
+              <option value="latin">Latin (Top letter 'I' ~11.2%, 'E' ~10.8%, IoC ~0.0740)</option>
+            </select>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="true-key-slider" style="font-size:0.8rem; font-weight:600; text-transform:uppercase;">Secret Shift Key (Ground Truth):</label>
+              <span id="true-key-val" class="slider-val">7</span>
+            </div>
+            <input type="range" id="true-key-slider" class="custom-range" min="1" max="25" value="7">
+            <div style="display:flex; justify-content:space-between;">
+              <button id="btn-random-key" class="btn btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;">🎲 Random Key</button>
+              <button id="btn-random-snippet" class="btn btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;">🔀 New Text Snippet</button>
+            </div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="length-slider" style="font-size:0.8rem; font-weight:600; text-transform:uppercase;">Ciphertext Sample Length (N Letters):</label>
+              <span id="length-val" class="slider-val">75</span>
+            </div>
+            <input type="range" id="length-slider" class="custom-range" min="5" max="500" value="75">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+              <span>5 chars</span>
+              <span>25 (Threshold)</span>
+              <span>100 chars</span>
+              <span>500 chars</span>
+            </div>
+          </div>
+
+          <div class="input-item">
+            <label for="corpus-textarea">Reference Corpus / Source Plaintext</label>
+            <textarea id="corpus-textarea" class="custom-textarea"></textarea>
+          </div>
+        </div>
+
+        <!-- Attack Results Card -->
+        <div class="attack-results-card">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Live Cryptanalysis Engines</span>
+          </div>
+
+          <div class="algo-comparison-grid">
+            <!-- 1. Chi-Squared -->
+            <div class="algo-card" id="card-algo-chi">
+              <div class="algo-name">1. Chi-Squared (χ²)</div>
+              <div class="algo-recovered-key" id="val-chi-key">Shift: ?</div>
+              <div class="algo-metric" id="val-chi-score">Min χ²: --</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: auto;">
+                Global distribution goodness-of-fit test
+              </div>
+            </div>
+
+            <!-- 2. Dot Product / Cross-Correlation -->
+            <div class="algo-card" id="card-algo-dot">
+              <div class="algo-name">2. Cross-Correlation</div>
+              <div class="algo-recovered-key" id="val-dot-key">Shift: ?</div>
+              <div class="algo-metric" id="val-dot-score">Dot Prod: --</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: auto;">
+                Frequency vector cosine / dot-product similarity
+              </div>
+            </div>
+
+            <!-- 3. Argmax Frequency -->
+            <div class="algo-card" id="card-algo-argmax">
+              <div class="algo-name">3. Argmax Peak</div>
+              <div class="algo-recovered-key" id="val-argmax-key">Shift: ?</div>
+              <div class="algo-metric" id="val-argmax-detail">Peak: --</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: auto;">
+                Matches top ciphertext peak to language mode
+              </div>
+            </div>
+          </div>
+
+          <!-- Intercepted Text -->
+          <div class="plaintext-reveal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span class="reveal-title">Intercepted Ciphertext</span>
+              <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; font-family: var(--font-mono);">
+                <span id="disp-cipher-length" style="color: var(--amber);">75 letters</span>
+                <span id="disp-cipher-ioc" style="color: var(--cyan);">IoC: 0.0667</span>
+              </div>
+            </div>
+            <div class="reveal-content" style="color: var(--amber); border-color: rgba(245, 158, 11, 0.3);" id="disp-ciphertext">...</div>
+          </div>
+
+          <!-- Decrypted Reveal -->
+          <div class="plaintext-reveal-box">
+            <span class="reveal-title">Recovered Plaintext (Decrypted with Predicted Shift)</span>
+            <div class="reveal-content" id="disp-decrypted-text">...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHIFT CANDIDATE SCORE CHART -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #fff;">Chi-Squared (χ²) Score Profile Across All 26 Candidate Shifts</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              The true shift produces a sharp minimum (trough) in χ², distinguishing it from the 25 false shifts.
+              <span style="color: var(--emerald-light); font-weight: 600;">Emerald bar</span> denotes the true key.
+            </p>
+          </div>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="shift-score-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: MONTE CARLO EMPIRICAL BENCHMARKING LAB -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Empirical Statistical Experiment</div>
+        <h2 class="section-title">Cryptanalysis Success Rate vs Ciphertext Length (Monte Carlo Simulation)</h2>
+        <p class="section-desc">
+          Systematically test the effectiveness and statistical limitations of the three algorithms across 14 distinct
+          ciphertext lengths ($N = 5 \dots 500$). The simulator runs dozens of randomized trials per length to plot the
+          empirical success rate curve.
+        </p>
+      </div>
+
+      <div class="monte-carlo-box">
+        <div class="mc-controls">
+          <button id="btn-run-mc" class="btn btn-primary">
+            🚀 Run Monte Carlo Benchmark
+          </button>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label for="mc-trials-select" style="font-size: 0.825rem; font-weight: 600; text-transform: uppercase;">Trials / Length:</label>
+            <select id="mc-trials-select" class="custom-select" style="width: auto; padding: 0.45rem 0.8rem;">
+              <option value="50" selected>50 trials (Fast ~2s)</option>
+              <option value="100">100 trials (High Precision ~4s)</option>
+              <option value="200">200 trials (Rigorous ~8s)</option>
+            </select>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-bar" id="mc-progress-bar"></div>
+          </div>
+
+          <span id="mc-status-text" style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">
+            Ready to simulate.
+          </span>
+        </div>
+
+        <div class="chart-container" style="background: var(--bg-primary); margin-bottom: 0;">
+          <div class="chart-header">
+            <h3 style="font-size: 1rem; color: #fff;">Success Rate (%) vs Ciphertext Length (N Letters)</h3>
+            <div style="display: flex; gap: 1rem; font-size: 0.8rem;">
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span style="width: 12px; height: 12px; background: #10b981; border-radius: 2px;"></span>
+                <span>Chi-Squared (χ²)</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span style="width: 12px; height: 12px; background: #06b6d4; border-radius: 2px;"></span>
+                <span>Cross-Correlation</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 2px;"></span>
+                <span>Argmax Peak</span>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="mc-results-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: THEORETICAL DISCUSSION & LIMITATIONS -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Academic Discussion</div>
+        <h2 class="section-title">Effectiveness, Unicity Distance & Statistical Limitations</h2>
+        <p class="section-desc">
+          A rigorous discussion of why the algorithm works, when it fails, and how information theory explains its
+          performance boundaries.
+        </p>
+      </div>
+
+      <div class="theory-grid">
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            Shannon's Unicity Distance (Theory vs Practice)
+          </h4>
+          <p>
+            Claude Shannon defined the <strong>Unicity Distance</strong> <span class="code-pill">U</span> as the minimum
+            length of ciphertext required for a computationally unbounded adversary to uniquely determine the secret key
+            without ambiguity:
+            <br><br>
+            <code>U = H(𝒦) / D = log₂(26) / [R_L · log₂(26)] ≈ 4.70 / 3.20 ≈ 1.5 to 2 letters</code>
+            <br><br>
+            Theoretically, just <strong>2 letters</strong> of English text contain enough statistical redundancy to rule
+            out 25 spurious keys. However, unicity distance assumes an optimal language model with infinite n-gram
+            memory. In practice, unigram statistical tests (like Chi-squared) suffer from <em>sample variance</em> on
+            short snippets. Our empirical benchmark proves that <strong>N ≥ 25–30 characters</strong> is required for
+            near-100% confidence.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Algorithm Comparison: Chi-Squared vs Argmax
+          </h4>
+          <p>
+            • <strong>Chi-Squared (χ²):</strong> Considers all 26 letter frequencies simultaneously. Even if the letter
+            'E' happens to be rare in a short sentence, the combined frequencies of 'T', 'A', 'O', 'I', 'N', and rare
+            letters ('Q', 'Z') collectively guide the optimization to the correct shift.
+            <br><br>
+            • <strong>Argmax Peak Matching:</strong> Relies solely on the mode (the single highest peak). In short
+            texts (e.g., $N &lt; 25$), words like "BANANA" or "MISSISSIPPI" create local modes on 'A' or 'S', causing
+            Argmax to fail dramatically.
+            <br><br>
+            • <strong>Cross-Correlation:</strong> Highly robust and mathematically equivalent to maximizing the cosine
+            similarity between empirical and theoretical probability vectors.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            Pathological Failure Modes & Limitations
+          </h4>
+          <p>
+            Statistical cryptanalysis fails or degrades under specific conditions:
+            <br><br>
+            1. <strong>Lipograms:</strong> Texts deliberately crafted to omit specific letters (e.g. Ernest Vincent
+            Wright's 50,000-word novel <em>Gadsby</em> contains zero instances of 'E'). Both Argmax and Chi-squared
+            will misidentify the shift unless tailored to lipogram models.
+            <br>
+            2. <strong>Technical/Domain Vocabularies:</strong> Medical, chemical, or algebraic formulas with abnormal
+            concentrations of 'X', 'Z', 'C', or 'K'.
+            <br>
+            3. <strong>Cross-Language Mismatch:</strong> Attacking an Italian or Spanish ciphertext using English
+            reference tables will misalign vowels ('A', 'I', 'O'), producing distorted χ² minima.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>HMWK 3 — Task 2: Statistical Cryptanalysis of the Caesar Cipher</strong></p>
+        <p>Statistics & Cryptography Coursework | Frequency Analysis, Goodness-of-Fit & Monte Carlo Benchmarking</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home Hub</a>
+        <a href="task1.html">Task 1: Dual Encryption</a>
+        <a href="task3.html">Task 3: ECC Key Recovery</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="task2.js"></script>
+</body>
+
+</html>

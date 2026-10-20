@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 1: Dual Encryption Lab — Toy secp256k1 ECC vs Caesar Cipher | HMWK 3</title>
+  <meta name="description"
+    content="Interactive cryptographic demonstration comparing the classical Caesar Cipher and a toy Elliptic-Curve (secp256k1) encryption scheme. Analyzes mathematical steps, key roles, key spaces, and statistical properties.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="task1.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Task 1: Dual Encryption Lab</h1>
+          <p class="subtitle">Toy secp256k1 ECC vs Caesar Cipher</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-pill home-btn">← Home Hub</a>
+        <a href="task1.html" class="nav-pill active">Task 1: Dual Encryption</a>
+        <a href="task2.html" class="nav-pill">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html" class="nav-pill">Task 3: ECC Key Recovery</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Context Banner -->
+    <section class="context-banner">
+      <div class="banner-card">
+        <div class="banner-badge">HMWK 3 — Task 1 : Encryption Procedures & Statistical Properties</div>
+        <h2>Symmetric Modular Permutation vs Asymmetric Group Law</h2>
+        <p>
+          This laboratory presents a live, side-by-side implementation of two fundamentally contrasting encryption
+          schemes: the classical <strong>Caesar Cipher</strong> (a deterministic monoalphabetic shift) and a
+          <strong>Toy Elliptic-Curve Scheme</strong> based on the secp256k1 curve family (<span
+            class="code-pill">y² ≡ x³ + 7 mod 17</span>) developed in HMWK 1.
+          Observe how the same plaintext message undergoes deterministic linear translation versus non-linear
+          ephemeral point addition, and evaluate the resulting statistical distributions.
+        </p>
+
+        <div class="banner-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Caesar Key Space</span>
+            <span class="meta-val">ℤ₂₆ (|𝒦| = 26 shifts)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Toy ECC Curve</span>
+            <span class="meta-val">y² ≡ x³ + 7 (mod 17)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Toy Base Generator</span>
+            <span class="meta-val">G = (1, 5), Subgroup Order n = 18</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">HMWK 1 Reference Key</span>
+            <span class="meta-val">k = 6 → Q = 6G = (5, 8)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: INTERACTIVE INPUT DASHBOARD -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Interactive Controls</div>
+        <h2 class="section-title">Message Input & Parameter Workbench</h2>
+        <p class="section-desc">
+          Enter any message or choose one of the preset cryptographic texts to see both algorithms execute
+          simultaneously in real time.
+        </p>
+      </div>
+
+      <div class="input-dashboard">
+        <div class="input-row">
+          <div class="input-group" style="flex: 2;">
+            <label for="input-message">Plaintext Message</label>
+            <input type="text" id="input-message" class="text-input"
+              value="CRYPTOGRAPHY AND STATISTICS ARE POWERFUL ALLIES" placeholder="Enter message to encrypt...">
+          </div>
+          <div class="input-group" style="flex: 1;">
+            <label>Quick Presets</label>
+            <div class="btn-group">
+              <button class="btn btn-secondary preset-btn" data-text="STATISTICS AND CRYPTOGRAPHY">Statistics</button>
+              <button class="btn btn-secondary preset-btn" data-text="AAAAAA REPEATING LETTERS">Repeat A's</button>
+              <button class="btn btn-secondary preset-btn" data-text="ATTACK AT DAWN">Classic</button>
+              <button id="btn-randomize-msg" class="btn btn-primary" title="Randomize Message">🎲 Random</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="caesar-shift-slider">Caesar Shift Key (k ∈ [0, 25]): <span id="caesar-shift-val"
+                class="slider-val-badge">3</span></label>
+            <div class="caesar-slider-wrap">
+              <input type="range" id="caesar-shift-slider" class="slider-range" min="0" max="25" value="3">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="ecc-key-select">Receiver Private Key (k)</label>
+            <select id="ecc-key-select" class="custom-select">
+              <!-- Dynamically populated 1 to 17 -->
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="ecc-nonce-select">Sender Ephemeral Nonce (r)</label>
+            <select id="ecc-nonce-select" class="custom-select">
+              <!-- Dynamically populated 1 to 17 -->
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="ecc-mode-select">ECC Protocol Paradigm</label>
+            <select id="ecc-mode-select" class="custom-select">
+              <option value="ecdh" selected>ECDH / ECIES Keystream Masking [Direct Caesar Parallel]</option>
+              <option value="elgamal">Point-based EC-ElGamal [(C₁, C₂) = (rG, M + rQ)]</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- DUAL SCHEME DISPLAY -->
+      <div class="dual-scheme-grid">
+        <!-- CARD 1: CAESAR CIPHER -->
+        <div class="scheme-card caesar">
+          <div class="card-header-row">
+            <div class="card-title">
+              <span class="badge-pill badge-amber">Symmetric</span>
+              <span>The Caesar Cipher</span>
+            </div>
+            <span class="badge-pill badge-amber">Complexity O(1)</span>
+          </div>
+
+          <div class="key-inspector">
+            <div class="key-inspector-title">Cipher Key & Permutation Strip</div>
+            <div class="key-param-list">
+              <div class="key-param-item">
+                <span class="param-name">Symmetric Secret Key (k):</span>
+                <span class="param-value" id="disp-caesar-key">Shift +3 mod 26</span>
+              </div>
+              <div class="key-param-item">
+                <span class="param-name">Algorithm Rule:</span>
+                <span class="param-value">Cᵢ ≡ (Pᵢ + k) mod 26</span>
+              </div>
+            </div>
+            <div class="alphabet-strip" id="alphabet-strip">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="output-box">
+            <div class="output-label">Ciphertext (Encrypted Message)</div>
+            <div class="output-text" id="caesar-ciphertext">...</div>
+          </div>
+
+          <div class="output-box">
+            <div class="output-label">Decrypted Plaintext: Pᵢ ≡ (Cᵢ - k) mod 26</div>
+            <div class="output-text highlight" id="caesar-decrypted">...</div>
+          </div>
+
+          <div class="steps-container">
+            <table class="steps-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Plain</th>
+                  <th>Code</th>
+                  <th>Formula Trace</th>
+                  <th>Cipher</th>
+                </tr>
+              </thead>
+              <tbody id="caesar-steps-body">
+                <!-- Trace rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CARD 2: TOY SECP256K1 ECC SCHEME -->
+        <div class="scheme-card ecc">
+          <div class="card-header-row">
+            <div class="card-title">
+              <span class="badge-pill badge-cyan">Asymmetric</span>
+              <span>Toy secp256k1 ECC Scheme</span>
+            </div>
+            <span class="badge-pill badge-cyan">Group Law over 𝔽₁₇</span>
+          </div>
+
+          <div class="key-inspector">
+            <div class="key-inspector-title">Cryptographic Key Architecture</div>
+            <div class="key-param-list">
+              <div class="key-param-item">
+                <span class="param-name">Receiver Public Key (Q = kG):</span>
+                <span class="param-value" id="ecc-public-key-val">Q = (5, 8)</span>
+              </div>
+              <div class="key-param-item">
+                <span class="param-name">Sender Ephemeral Point (R = rG):</span>
+                <span class="param-value" id="ecc-ephemeral-point-val">R = (12, 1)</span>
+              </div>
+              <div class="key-param-item">
+                <span class="param-name">Shared Secret Point (S = rQ = kR):</span>
+                <span class="param-value" id="ecc-shared-secret-val">S = (5, 8)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="output-box">
+            <div class="output-label">Ciphertext (Transmitted Cryptogram)</div>
+            <div class="output-text" id="ecc-ciphertext">...</div>
+          </div>
+
+          <div class="output-box">
+            <div class="output-label">Decrypted Plaintext (Receiver Recovered)</div>
+            <div class="output-text highlight" id="ecc-decrypted">...</div>
+          </div>
+
+          <div class="steps-container">
+            <table class="steps-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Plain</th>
+                  <th>Point / Key</th>
+                  <th>Algebraic Operation</th>
+                  <th>Cipher</th>
+                  <th>Decrypted</th>
+                </tr>
+              </thead>
+              <tbody id="ecc-steps-body">
+                <!-- Trace rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: STATISTICAL COMPARISON -->
+      <div class="section-header" style="margin-top: 2rem;">
+        <div class="section-tag">Statistical Analysis</div>
+        <h2 class="section-title">Comparative Letter Distribution & Entropy Analysis</h2>
+        <p class="section-desc">
+          Compare the statistical properties of the original message against both ciphertexts.
+          Observe how the Caesar cipher merely slides the plaintext frequency histogram, while the ECC scheme
+          flattens letter frequencies into pseudo-random noise.
+        </p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="metric-card">
+          <span class="metric-label">Shannon Entropy (Plaintext)</span>
+          <span class="metric-val" id="kpi-plain-entropy">0.000 bits</span>
+          <span class="metric-sub">Theoretical Max: 4.700 bits (uniform)</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Shannon Entropy (Caesar Ciphertext)</span>
+          <span class="metric-val" style="color: var(--amber);" id="kpi-caesar-entropy">0.000 bits</span>
+          <span class="metric-sub">Identical to plaintext: H(C) = H(P)</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Shannon Entropy (ECC Ciphertext)</span>
+          <span class="metric-val" style="color: var(--cyan);" id="kpi-ecc-entropy">0.000 bits</span>
+          <span class="metric-sub">Approaches high entropy distribution</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Index of Coincidence (Plaintext)</span>
+          <span class="metric-val" id="kpi-plain-ioc">0.0000</span>
+          <span class="metric-sub">Natural English text: ~0.0667</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Index of Coincidence (Caesar)</span>
+          <span class="metric-val" style="color: var(--amber);" id="kpi-caesar-ioc">0.0000</span>
+          <span class="metric-sub">Strictly invariant: IoC(C) = IoC(P)</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Index of Coincidence (ECC)</span>
+          <span class="metric-val" style="color: var(--cyan);" id="kpi-ecc-ioc">0.0000</span>
+          <span class="metric-sub">Flattens toward uniform: ~0.0385</span>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 style="font-size: 1.1rem; color: #fff;">Unigram Letter Frequency Distribution (A–Z)</h3>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--indigo);"></span>
+              <span>Plaintext</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--amber);"></span>
+              <span>Caesar Cipher</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: var(--cyan);"></span>
+              <span>ECC Scheme</span>
+            </div>
+          </div>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="freq-comparison-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: THEORETICAL DISCUSSION & ANALYSIS -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Formal Discussion</div>
+        <h2 class="section-title">Similarities and Differences: Detailed Academic Analysis</h2>
+        <p class="section-desc">
+          Addressing the core homework requirements: comparing encryption/decryption procedures, key spaces, the
+          role of keys, and statistical resistance to cryptanalysis.
+        </p>
+      </div>
+
+      <!-- Comparative Table -->
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Dimension</th>
+              <th style="width: 40%; color: var(--amber);">The Caesar Cipher</th>
+              <th style="width: 40%; color: var(--cyan);">Toy secp256k1 ECC Scheme</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cryptographic Paradigm</strong></td>
+              <td><strong>Symmetric Monoalphabetic Substitution:</strong> Both parties must securely pre-share the exact
+                same secret shift key before communication.</td>
+              <td><strong>Asymmetric / Public-Key (Diffie-Hellman / ElGamal):</strong> Receiver publishes public point
+                <span class="code-pill">Q = kG</span>; sender uses ephemeral scalar <span class="code-pill">r</span>
+                without prior secret exchange.</td>
+            </tr>
+            <tr>
+              <td><strong>Role of the Keys</strong></td>
+              <td>
+                • <strong>Shift Key k ∈ {0, ..., 25}:</strong> A single scalar that directly translates every character
+                index along the alphabet ring.<br>
+                • Senders and receivers possess identical knowledge.
+              </td>
+              <td>
+                • <strong>Private Key k:</strong> Kept secret by Alice, used to compute shared secret <span
+                  class="code-pill">S = kR</span>.<br>
+                • <strong>Public Key Q = kG:</strong> Published to the world.<br>
+                • <strong>Ephemeral Nonce r:</strong> Chosen fresh per message by Bob to compute <span class="code-pill">R
+                  = rG</span> and shared secret <span class="code-pill">S = rQ</span>.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Encryption Procedure</strong></td>
+              <td>
+                Modular addition in cyclic group ℤ₂₆:<br>
+                <code>Cᵢ = (Pᵢ + k) mod 26</code><br>
+                Deterministic: identical plaintext letters yield identical ciphertext letters every single time.
+              </td>
+              <td>
+                Algebraic group addition on elliptic curve over finite field:<br>
+                • Compute <span class="code-pill">R = rG</span> and <span class="code-pill">S = rQ</span>.<br>
+                • Either point addition <span class="code-pill">C₂ = M + S</span> or keystream masking.<br>
+                Probabilistic (IND-CPA): fresh nonce <span class="code-pill">r</span> produces completely distinct
+                ciphertexts for identical plaintexts.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Decryption Procedure</strong></td>
+              <td>
+                Modular subtraction (inverse shift):<br>
+                <code>Pᵢ = (Cᵢ - k) mod 26</code>
+              </td>
+              <td>
+                Scalar multiplication & group subtraction:<br>
+                • Alice calculates <span class="code-pill">S = kR = k(rG) = r(kG) = rQ</span>.<br>
+                • Recovers <span class="code-pill">M = C₂ - S</span> or inverts the keystream.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Key Space Size (|𝒦|)</strong></td>
+              <td>
+                <strong>|𝒦| = 26:</strong> Trivial to exhaust in 26 attempts (~0.001 ms). Effectively 25 non-trivial keys.
+              </td>
+              <td>
+                • <strong>Toy Field 𝔽₁₇:</strong> |𝒦| = 18 points (subgroup order).<br>
+                • <strong>Standard secp256k1:</strong> |𝒦| = n ≈ 1.1579 × 10⁷⁷ ≈ 2²⁵⁶ keys. Computationally
+                inexhaustible.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Statistical Properties</strong></td>
+              <td>
+                <strong>Information-Preserving (Vulnerable):</strong><br>
+                Preserves exact letter frequency distribution, bigrams, trigrams, and Index of Coincidence (IoC).
+                Susceptible to immediate statistical frequency analysis.
+              </td>
+              <td>
+                <strong>Information-Scrambling (Secure):</strong><br>
+                Destroys natural language frequency peaks due to the non-linear discrete logarithm mapping and
+                ephemeral nonce randomization. Ciphertext resembles uniform white noise.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Synthesis Cards -->
+      <div class="theory-grid">
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            Shannon's Confusion & Diffusion
+          </h4>
+          <p>
+            Claude Shannon established that secure ciphers must maximize <strong>confusion</strong> (making the
+            relationship between the key and the ciphertext as complex and non-linear as possible) and
+            <strong>diffusion</strong> (dissipating plaintext statistical redundancy across the entire ciphertext).
+            The Caesar cipher features zero diffusion and linear confusion: each ciphertext character depends on
+            exactly one plaintext letter and a scalar addition.
+            In contrast, elliptic-curve scalar multiplication <span class="code-pill">Q = kG</span> is an algebraic
+            one-way function exhibiting pseudo-random coordinate dispersion across finite field coordinates.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+            Semantic Security (IND-CPA)
+          </h4>
+          <p>
+            A cipher is <strong>indistinguishable under chosen-plaintext attack (IND-CPA)</strong> if an adversary who
+            submits two equal-length messages <span class="code-pill">M₀</span> and <span class="code-pill">M₁</span>
+            cannot determine with probability significantly greater than 1/2 which one was encrypted.
+            Because Caesar is deterministic, an adversary immediately distinguishes whether "A" encrypted to "D" or
+            "Z".
+            In ECC schemes, the ephemeral scalar <span class="code-pill">r</span> ensures that encrypting the word
+            "HELLO" twice yields two completely uncorrelated ciphertexts, achieving semantic security.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Bridge to Task 2 & Task 3
+          </h4>
+          <p>
+            The profound differences exposed here establish the mathematical foundation for the remaining tasks:
+            In <strong>Task 2</strong>, we exploit the rigid frequency-preservation property of Caesar to build an
+            automated statistical cryptanalysis engine that cracks the shift key using the Chi-squared test and letter
+            distributions.
+            In <strong>Task 3</strong>, we show that attacking the ECC scheme cannot be done statistically; instead, it
+            requires solving the Discrete Logarithm Problem, which is trivial only when the key space is artificially
+            restricted as in our toy demonstration.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>HMWK 3 — Task 1: Dual Encryption Lab</strong></p>
+        <p>Statistics & Cryptography Coursework | Comparing secp256k1 ECC and the Caesar Cipher</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home Hub</a>
+        <a href="task2.html">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html">Task 3: ECC Key Recovery</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="task1.js"></script>
+</body>
+
+</html>

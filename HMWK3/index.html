@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework (2) — Cryptographic Foundations & Statistical Cryptanalysis | HMWK 3</title>
+  <meta name="description"
+    content="A unified research laboratory and portal for Homework 2 in Statistics & Cryptography. Features the Toy secp256k1 ECC scheme, Caesar cipher, Statistical Cryptanalysis, and Restricted-Keyspace Discrete Logarithm attacks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Homework (2) Portal</h1>
+          <p class="subtitle">Statistics & Cryptography Research Suite</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-pill active">Home Hub</a>
+        <a href="task1.html" class="nav-pill">Task 1: Dual Encryption</a>
+        <a href="task2.html" class="nav-pill">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html" class="nav-pill">Task 3: ECC Key Recovery</a>
+        <a href="../HMWK1/index.html" class="nav-pill external" title="View HMWK 1">HMWK 1 ↗</a>
+        <a href="../HMWK2/index.html" class="nav-pill external" title="View HMWK 2">HMWK 2 ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero-banner">
+      <div class="hero-badge">Statistics & Applied Cryptography — Assignment Suite</div>
+      <h1 class="hero-title">
+        The Geometry of Secrets: <br>
+        <span class="gradient-text">From Caesar to secp256k1</span>
+      </h1>
+      <p class="hero-subtitle">
+        An interactive laboratory exploring the mathematical duality of cryptography: comparing the classical
+        monoalphabetic Caesar cipher with modern elliptic-curve public-key cryptography over finite fields,
+        demonstrating statistical key recovery, and analyzing discrete logarithm attack limits.
+      </p>
+    </section>
+
+    <!-- 3 TASKS CARDS GRID -->
+    <section class="tasks-grid">
+      <!-- TASK 1 CARD -->
+      <article class="task-card task-1">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <span class="task-tag t1">Task 1</span>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Interactive Lab</span>
+          </div>
+          <h2 class="card-title">Dual Encryption Lab: Toy secp256k1 vs Caesar Cipher</h2>
+          <p class="card-desc">
+            Encrypt and decrypt the same message using both the toy elliptic curve scheme from HMWK 1
+            (<span class="code-pill">y² ≡ x³ + 7 mod 17</span>) and the Caesar cipher. Observe the step-by-step
+            mathematical execution, key roles, and real-time frequency distribution transformations.
+          </p>
+          <ul class="card-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Live side-by-side encryption & decryption with custom text</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Point-based EC-ElGamal and ECDH keystream masking paradigms</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Comparative unigram frequency histograms & Shannon entropy meters</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>In-depth theoretical comparison of procedures, key spaces, and security</span>
+            </li>
+          </ul>
+        </div>
+        <a href="task1.html" class="card-btn btn-t1">
+          <span>Launch Task 1 Lab</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14m-7-7 7 7-7 7"></path>
+          </svg>
+        </a>
+      </article>
+
+      <!-- TASK 2 CARD -->
+      <article class="task-card task-2">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <span class="task-tag t2">Task 2</span>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Empirical Experiment</span>
+          </div>
+          <h2 class="card-title">Statistical Cryptanalysis of the Caesar Cipher</h2>
+          <p class="card-desc">
+            Exploit the non-uniform distribution of natural language letters to recover the secret shift key.
+            Benchmark the Chi-squared test against Frequency Cross-Correlation, Argmax peak analysis, and the Index of
+            Coincidence across multiple languages and variable sample lengths.
+          </p>
+          <ul class="card-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Multi-language reference corpora (English, Italian, Spanish, Latin)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Automated key cracking via Chi-Squared (χ²), Dot-Product, and Argmax</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Monte Carlo empirical simulator: Success Rate (%) vs Length ($N = 5 \dots 500$)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Shannon's unicity distance and pathological failure modes analysis</span>
+            </li>
+          </ul>
+        </div>
+        <a href="task2.html" class="card-btn btn-t2">
+          <span>Launch Task 2 Lab</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14m-7-7 7 7-7 7"></path>
+          </svg>
+        </a>
+      </article>
+
+      <!-- TASK 3 CARD -->
+      <article class="task-card task-3">
+        <div class="card-top">
+          <div class="card-badge-row">
+            <span class="task-tag t3">Task 3</span>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Algebraic Cryptanalysis</span>
+          </div>
+          <h2 class="card-title">Restricted-Keyspace ECC Attack & Security Scaling</h2>
+          <p class="card-desc">
+            Exploit the restricted private key space of the toy curve ($k \in [1, 18]$) using Exhaustive Search,
+            Baby-Step Giant-Step ($O(\sqrt{K})$), and Pollard's Rho. Demonstrate live key recovery, followed by an
+            interactive scalability calculator showing why 256-bit ECC is impervious to attacks.
+          </p>
+          <ul class="card-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Interactive Discrete Logarithm solver with live step execution console</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Automatic message decryption upon private key recovery</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Security scaling calculator: 4-bit toy curve to 256-bit secp256k1</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Pohlig-Hellman composite order & ciphertext malleability analysis</span>
+            </li>
+          </ul>
+        </div>
+        <a href="task3.html" class="card-btn btn-t3">
+          <span>Launch Task 3 Lab</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14m-7-7 7 7-7 7"></path>
+          </svg>
+        </a>
+      </article>
+    </section>
+
+    <!-- SECTION: ACADEMIC COMPARATIVE MATRIX -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Cross-Task Synthesis</div>
+        <h2 class="section-title">Comparative Mathematical Architecture</h2>
+        <p class="section-desc">
+          A high-level synthesis contrasting the three domains investigated across this homework assignment.
+        </p>
+      </div>
+
+      <div class="matrix-table-wrapper">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">Dimension</th>
+              <th style="width: 27%;">Task 1: Encryption Lab</th>
+              <th style="width: 27%;">Task 2: Caesar Cryptanalysis</th>
+              <th style="width: 28%;">Task 3: ECC Key Recovery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary Objective</strong></td>
+              <td>Demonstrate encryption & decryption on Caesar and Toy secp256k1 schemes.</td>
+              <td>Recover the Caesar shift key using letter frequency statistics on variable lengths.</td>
+              <td>Crack the toy ECC private key using algebraic discrete logarithm algorithms.</td>
+            </tr>
+            <tr>
+              <td><strong>Cryptanalytic Vector</strong></td>
+              <td>None (Constructive forward and inverse protocol execution).</td>
+              <td><strong>Information-Theoretic:</strong> Exploits non-uniform unigram language redundancy.</td>
+              <td><strong>Algebraic:</strong> Solves group homomorphism on restricted key space.</td>
+            </tr>
+            <tr>
+              <td><strong>Key Space Size (|𝒦|)</strong></td>
+              <td>Caesar: 26 shifts | Toy ECC: 18 points | Full ECC: $2^{256}$ keys.</td>
+              <td>$|\mathcal{K}| = 26$ shifts (exhausted in 26 evaluations).</td>
+              <td>Toy: $|\mathcal{K}| = 18$ | Standard secp256k1: $|\mathcal{K}| \approx 1.16 \times 10^{77}$.</td>
+            </tr>
+            <tr>
+              <td><strong>Algorithmic Complexity</strong></td>
+              <td>$O(N)$ for message length $N$ on both schemes.</td>
+              <td>$O(26 \cdot N)$ for Chi-squared goodness-of-fit evaluation.</td>
+              <td>Brute-force: $O(K)$ | BSGS / Pollard's Rho: $O(\sqrt{K})$.</td>
+            </tr>
+            <tr>
+              <td><strong>Fundamental Limit</strong></td>
+              <td>Caesar lacks semantic security (IND-CPA); ECC provides IND-CPA via nonces.</td>
+              <td>Unicity distance ($U \approx 2$ chars in theory; $N \ge 25$ in practice).</td>
+              <td>Square-root generic barrier: $O(\sqrt{n}) \approx 2^{128}$ ops for 256-bit ECC.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>Statistics & Cryptography Homework (2) Suite — HMWK 3</strong></p>
+        <p>Comparative Study of Caesar Cipher and Elliptic-Curve Cryptography (secp256k1)</p>
+      </div>
+      <div class="footer-links">
+        <a href="task1.html">Task 1: Dual Encryption</a>
+        <a href="task2.html">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html">Task 3: ECC Key Recovery</a>
+        <a href="../HMWK1/index.html">HMWK 1</a>
+        <a href="../HMWK2/index.html">HMWK 2</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="home.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 3: Toy secp256k1 Key Recovery & Security Scaling | HMWK 3</title>
+  <meta name="description"
+    content="Cryptanalysis of restricted-keyspace toy secp256k1 elliptic curve cryptography. Interactive demonstration of Exhaustive Brute-Force, Baby-Step Giant-Step, Pollard's Rho, and 256-bit security scaling.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="task3.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Task 3: ECC Key Recovery Lab</h1>
+          <p class="subtitle">Restricted-Keyspace Attack & 256-bit Security Scaling</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-pill home-btn">← Home Hub</a>
+        <a href="task1.html" class="nav-pill">Task 1: Dual Encryption</a>
+        <a href="task2.html" class="nav-pill">Task 2: Caesar Cryptanalysis</a>
+        <a href="task3.html" class="nav-pill active">Task 3: ECC Key Recovery</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Context Banner -->
+    <section class="context-banner">
+      <div class="banner-card">
+        <div class="banner-badge">HMWK 3 — Task 3 : Discrete Logarithm Cryptanalysis & Keyspace Scaling</div>
+        <h2>Exploiting Artificially Restricted Key Spaces in Elliptic Curve Cryptography</h2>
+        <p>
+          In HMWK 1, we instantiated a toy secp256k1 curve over the tiny finite field <span
+            class="code-pill">y² ≡ x³ + 7 mod 17</span> with cyclic subgroup order <span class="code-pill">n = 18</span>,
+          restricting the private key to <span class="code-pill">k = 6</span> to make manual calculations and point
+          geometry visually tangible.
+          However, restricting the key space destroys the fundamental premise of the <strong>Elliptic Curve Discrete
+            Logarithm Problem (ECDLP)</strong>.
+          This laboratory implements a live attack engine utilizing <strong>Exhaustive Brute-Force</strong>,
+          <strong>Baby-Step Giant-Step (BSGS)</strong>, and <strong>Pollard's Rho algorithm</strong> to crack the private
+          key and decrypt the intercepted cryptogram, contrasting this with the absolute astronomical infeasibility of
+          attacking standard 256-bit ECC.
+        </p>
+
+        <div class="banner-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Toy Target Key</span>
+            <span class="meta-val">k = 6 → Q = 6G = (5, 8)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">ECDLP Hardness</span>
+            <span class="meta-val">O(√n) via BSGS / Pollard's Rho</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Toy Group Order</span>
+            <span class="meta-val">n = 18 (Composite: 2 × 3²)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Standard secp256k1</span>
+            <span class="meta-val">n ≈ 1.1579 × 10⁷⁷ (2²⁵⁶ bits)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: INTERACTIVE ATTACK WORKBENCH -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Interactive Attack Engine</div>
+        <h2 class="section-title">Live ECDLP Key Recovery Workbench</h2>
+        <p class="section-desc">
+          Select a restricted key range, pick a private key, and choose your mathematical attack algorithm.
+          Launch the engine to watch the live point multiplications, collision detections, and instantaneous plaintext
+          decryption.
+        </p>
+      </div>
+
+      <div class="attack-workbench-grid">
+        <!-- Target Setup -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="22" y1="12" x2="18" y2="12"></line>
+              <line x1="6" y1="12" x2="2" y2="12"></line>
+              <line x1="12" y1="6" x2="12" y2="2"></line>
+              <line x1="12" y1="22" x2="12" y2="18"></line>
+            </svg>
+            <span>Target Cryptosystem Setup</span>
+          </div>
+
+          <div class="input-item">
+            <label for="keyspace-select">Restricted Key Space Ceiling (K_max)</label>
+            <select id="keyspace-select" class="custom-select">
+              <option value="18" selected>K_max = 18 [HMWK1 Spec: y² ≡ x³ + 7 mod 17]</option>
+              <option value="36">K_max = 36 (Extended small range)</option>
+              <option value="100">K_max = 100 (100 candidate points)</option>
+              <option value="500">K_max = 500 (500 candidate points)</option>
+            </select>
+          </div>
+
+          <div class="input-item">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="private-key-select">Victim's Secret Key (Ground Truth)</label>
+              <button id="btn-random-key" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">🎲 Random Key</button>
+            </div>
+            <select id="private-key-select" class="custom-select">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="input-item">
+            <label for="attack-method-select">Attack Algorithm</label>
+            <select id="attack-method-select" class="custom-select">
+              <option value="bsgs" selected>Baby-Step Giant-Step [O(√K) Time & Memory Collision]</option>
+              <option value="brute">Exhaustive Brute-Force [O(K) Linear Point Addition]</option>
+              <option value="rho">Pollard's Rho Algorithm [O(√K) Time, O(1) Memory Walk]</option>
+            </select>
+          </div>
+
+          <div class="input-item">
+            <label for="secret-msg-input">Secret Plaintext Message to Intercept</label>
+            <input type="text" id="secret-msg-input" class="text-input" value="BITCOIN_AND_ETHEREUM_USE_SECP256K1">
+          </div>
+
+          <div class="target-spec-box">
+            <div class="target-row">
+              <span class="target-label">Curve & Field:</span>
+              <span class="target-val" id="target-curve-spec">y² ≡ x³ + 7 mod 17</span>
+            </div>
+            <div class="target-row">
+              <span class="target-label">Public Key (Q = kG):</span>
+              <span class="target-val" id="target-pubkey">Q = (5, 8)</span>
+            </div>
+            <div class="target-row">
+              <span class="target-label">Intercepted Cipher:</span>
+              <span class="target-val" id="target-ciphertext" style="color: var(--amber); font-size: 0.75rem;">...</span>
+            </div>
+          </div>
+
+          <button id="btn-launch-attack" class="btn btn-primary" style="margin-top: 0.5rem;">
+            🚀 Launch Attack Engine
+          </button>
+        </div>
+
+        <!-- Attack Live Console & Metrics -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>Live Attack Execution & Decryption Console</span>
+          </div>
+
+          <div class="attack-metrics-row">
+            <div class="metric-pill">
+              <span class="metric-pill-label">EC Operations</span>
+              <span class="metric-pill-val" id="metric-ops">0</span>
+            </div>
+            <div class="metric-pill">
+              <span class="metric-pill-label">Elapsed Time</span>
+              <span class="metric-pill-val" id="metric-time">0.00 ms</span>
+            </div>
+            <div class="metric-pill">
+              <span class="metric-pill-label">Recovered Key</span>
+              <span class="metric-pill-val" id="metric-recovered-key" style="color: var(--rose);">Pending</span>
+            </div>
+            <div class="metric-pill">
+              <span class="metric-pill-label">Theoretical Complexity</span>
+              <span class="metric-pill-val" id="metric-theoretical-ops" style="font-size: 0.85rem; color: var(--cyan);">O(√K)</span>
+            </div>
+          </div>
+
+          <div class="attack-log-console" id="attack-log-console">
+            <div class="log-entry info">Ready to attack. Click 'Launch Attack Engine' to begin.</div>
+          </div>
+
+          <div class="decrypted-reveal-card" id="decrypted-reveal-card" style="display: none;">
+            <span class="reveal-title">Decrypted Secret Message</span>
+            <div class="reveal-body" id="disp-recovered-plaintext">...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: FEASIBILITY & SCALING CALCULATOR -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Security Scaling Analysis</div>
+        <h2 class="section-title">Toy Scheme vs Properly Configured 256-bit secp256k1</h2>
+        <p class="section-desc">
+          Why does the attack succeed instantly on our toy curve but fail catastrophically against real Ethereum keys?
+          Interact with the security scaling calculator to see how exponential growth renders discrete logarithm attacks
+          physically impossible in standard ECC.
+        </p>
+      </div>
+
+      <div class="scaling-grid">
+        <!-- Interactive Slider & Table -->
+        <div class="calculator-card">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="20" x2="12" y2="10"></line>
+              <line x1="18" y1="20" x2="18" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="16"></line>
+            </svg>
+            <span>Key Bit-Length Scalability Calculator</span>
+          </div>
+
+          <div class="key-size-slider-wrap">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="scaling-slider" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Private Key Bit Length:</label>
+              <span id="scaling-bits-val" style="font-family: var(--font-mono); font-weight: 700; color: var(--rose);">256 bits</span>
+            </div>
+            <input type="range" id="scaling-slider" class="custom-range" min="4" max="256" step="1" value="256"
+              list="bit-markers">
+            <datalist id="bit-markers">
+              <option value="4"></option>
+              <option value="16"></option>
+              <option value="32"></option>
+              <option value="64"></option>
+              <option value="128"></option>
+              <option value="256"></option>
+            </datalist>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">
+              <span>4b (Toy)</span>
+              <span>16b</span>
+              <span>32b</span>
+              <span>64b</span>
+              <span>128b</span>
+              <span>256b (Standard)</span>
+            </div>
+          </div>
+
+          <table class="estimates-table">
+            <tbody>
+              <tr>
+                <th>Key Space Size (|𝒦| = 2ᵇ):</th>
+                <td id="scale-keyspace-val" style="font-family: var(--font-mono); color: #fff;">1.1579 × 10⁷⁷</td>
+              </tr>
+              <tr>
+                <th>Brute Force Complexity:</th>
+                <td id="scale-brute-ops-val" style="font-family: var(--font-mono); color: var(--rose);">1.1579 × 10⁷⁷ ops</td>
+              </tr>
+              <tr>
+                <th>Pollard's Rho Complexity (O(√n)):</th>
+                <td id="scale-rho-ops-val" style="font-family: var(--font-mono); color: var(--cyan);">3.40 × 10³⁸ ops (2¹²⁸)</td>
+              </tr>
+              <tr>
+                <th>Time on Single CPU Core (10⁷ ops/s):</th>
+                <td id="scale-cpu-time-val" style="font-family: var(--font-mono);">10⁶³ years</td>
+              </tr>
+              <tr>
+                <th>Time on Supercomputer Farm (10¹¹ ops/s):</th>
+                <td id="scale-gpu-time-val" style="font-family: var(--font-mono);">10²⁰ years</td>
+              </tr>
+              <tr>
+                <th>Time on Global Bitcoin Network (6×10²⁰ ops/s):</th>
+                <td id="scale-btc-time-val" style="font-family: var(--font-mono); font-weight: 700; color: var(--rose);">18.2 BILLION YEARS</td>
+              </tr>
+              <tr>
+                <th>Security Verdict:</th>
+                <td id="scale-verdict-val" style="color: var(--emerald-light); font-weight: 700;">UNBREAKABLE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Logarithmic Scale Canvas Chart -->
+        <div class="chart-container" style="margin-bottom: 0;">
+          <div class="chart-header">
+            <div>
+              <h3 style="font-size: 1.05rem; color: #fff;">Logarithmic Workload vs Key Bit-Length</h3>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                <span style="color: var(--rose); font-weight: 600;">Red:</span> Brute-force 2ᵇ |
+                <span style="color: var(--cyan); font-weight: 600;">Cyan:</span> Pollard's Rho 2ᵇ/² |
+                <span style="color: var(--amber); font-weight: 600;">Dashed:</span> Physical limit of computation
+              </p>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="scaling-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: THEORETICAL DISCUSSION & ANALYSIS -->
+    <section class="app-section">
+      <div class="section-header">
+        <div class="section-tag">Formal Academic Discussion</div>
+        <h2 class="section-title">Cryptanalytic Comparison & Architectural Weaknesses</h2>
+        <p class="section-desc">
+          Addressing the core homework requirements: comparing the ECC attack with Caesar cryptanalysis, explaining
+          the impossibility of attacks against 256-bit ECC, and analyzing design weaknesses of the toy scheme.
+        </p>
+      </div>
+
+      <div class="theory-grid">
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            1. ECC Attack vs Caesar Statistical Attack
+          </h4>
+          <p>
+            The two cryptanalytic approaches operate on completely separate theoretical planes:
+            <br><br>
+            • <strong>Caesar Cryptanalysis (Task 2)</strong> is an <em>information-theoretic attack</em> exploiting
+            <strong>plaintext redundancy</strong>. It does not invert a mathematical one-way function; it relies on the
+            fact that natural language letters possess a highly non-uniform probability distribution (<span
+              class="code-pill">H(X) &lt; log₂ 26</span>). If the plaintext were uniformly random bytes or a One-Time
+            Pad, statistical cryptanalysis would fail completely.
+            <br><br>
+            • <strong>ECC Cryptanalysis (Task 3)</strong> is an <em>algebraic computational attack</em> solving the
+            <strong>Discrete Logarithm Problem</strong>. It exploits <strong>computational under-dimensioning</strong>
+            (an artificially small key space <span class="code-pill">k ∈ [1, 18]</span>). It requires zero knowledge of
+            natural language statistics, works on completely random binary payloads, and attacks the algebraic group
+            homomorphism directly.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            2. Why the Attack Fails on Properly Configured ECC
+          </h4>
+          <p>
+            Against a standardized 256-bit elliptic curve like <strong>secp256k1</strong>, the private key space is:
+            <br>
+            <code>n = 1.15792089... × 10⁷⁷ ≈ 2²⁵⁶</code>
+            <br>
+            • <strong>Brute-force enumeration</strong> requires <span class="code-pill">2²⁵⁶</span> point additions.
+            <br>
+            • <strong>The Square-Root Barrier:</strong> The fastest known classical generic algorithms (BSGS, Pollard's
+            rho) require <span class="code-pill">O(√n) ≈ 2¹²⁸ ≈ 3.4 × 10³⁸</span> operations.
+            <br><br>
+            Even if we commandeered the <strong>entire global Bitcoin mining network</strong> (~600 Exahashes/second =
+            6 × 10²⁰ SHA256/s, equivalent to billions of specialized ASICs), solving one 256-bit discrete logarithm
+            would require:
+            <br>
+            <code>(3.4 × 10³⁸) / (6 × 10²⁰) ≈ 5.67 × 10¹⁷ seconds ≈ 18 BILLION YEARS</code>
+            <br>
+            This is substantially longer than the entire age of the universe (~13.8 billion years) and physically
+            impossible by Bremermann's and Landauer's thermodynamic limits of computation.
+          </p>
+        </div>
+
+        <div class="theory-card">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            3. Weaknesses of Restricted Keys vs Toy Scheme Design
+          </h4>
+          <p>
+            <strong>Weaknesses from Restricted Key Space:</strong>
+            <br>
+            • <em>Precomputation / Rainbow Tables:</em> Adversaries can precompute all <span class="code-pill">kG</span>
+            pairs offline in 0.001 ms, creating an instant lookup table that cracks future sessions in $O(1)$ memory
+            lookups.
+            <br><br>
+            <strong>Weaknesses Arising from the Design of the Toy Scheme Itself:</strong>
+            <br>
+            • <strong>Composite Subgroup Order (Pohlig-Hellman Attack):</strong> Over <span class="code-pill">𝔽₁₇</span>,
+            the curve order is <span class="code-pill">n = 18 = 2 × 3²</span>. By the <em>Pohlig-Hellman algorithm</em>,
+            the discrete log can be solved independently in subgroups of order 2 and 9 and recombined via the Chinese
+            Remainder Theorem. Total work is reduced from 18 to <span class="code-pill">2 + 3 = 5 operations</span>!
+            Standard curves explicitly demand a large prime order <span class="code-pill">n</span> to defeat
+            Pohlig-Hellman.
+            <br>
+            • <strong>Small Subgroup Confinement:</strong> An attacker sending points not on the main generator can leak
+            private key residues mod small factors.
+            <br>
+            • <strong>Ciphertext Malleability:</strong> Textbook ElGamal lacks authenticated encryption (AEAD). An
+            attacker can alter <span class="code-pill">C₂' = C₂ + Δ</span> to systematically alter decrypted plaintext.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>HMWK 3 — Task 3: Toy secp256k1 Key Recovery & Security Scaling</strong></p>
+        <p>Statistics & Cryptography Coursework | Discrete Logarithms, BSGS, Pollard's Rho & Scalability</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home Hub</a>
+        <a href="task1.html">Task 1: Dual Encryption</a>
+        <a href="task2.html">Task 2: Caesar Cryptanalysis</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="task3.js"></script>
+</body>
+
+</html>
