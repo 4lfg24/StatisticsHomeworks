@@ -34,6 +34,12 @@ Interactive research suites and computational laboratories for Statistics and Cr
   - Live interactive suite featuring sample trajectory explorer with $\pm 1\sigma$ and $\pm 2\sigma$ confidence funnels, terminal probability distribution histogram & ECDF vs Gaussian $\Phi(z)$, variance scaling benchmark (linear & log-log slopes), LLN violation vs Chebyshev bound, and Gaussian Q-Q plot with Kolmogorov-Smirnov test.
   - Cybersecurity operational risk analysis: system size $n$ predictability vs collective threat load $T_{m,n}$, and Extreme Value Theory (EVT) analysis of the worst-case attacker $\max_j S_n^{(j)}$.
 
+- **[HMWK5](HMWK5/README.md)**: **Homework 5 — Welford’s Recurrence Formulas for Online Mean, Sum of Squares & Variance**:
+  - Step-by-step mathematical derivation of Knuth's mean recurrence formula $\bar{x}_k = \bar{x}_{k-1} + (x_k - \bar{x}_{k-1})/k$.
+  - Formal derivation of Welford's recurrence formula for sum of squares $SS_k = SS_{k-1} + (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k)$ and sample/population variance.
+  - Python implementation in [HMWK5/welford.py](HMWK5/welford.py) featuring the exact 3-line core logic and streaming accumulator.
+  - Numerical stability analysis and empirical benchmark demonstrating catastrophic cancellation in the textbook naive formula vs exact precision in Welford's algorithm.
+
 ## How to Run
 
 Open any of the HTML files directly in your web browser, or serve locally using any standard static file server:
@@ -47,4 +53,10 @@ Then visit:
 - HMWK 2: `http://localhost:8000/HMWK2/index.html`
 - HMWK 3: `http://localhost:8000/HMWK3/index.html`
 - HMWK 4: `http://localhost:8000/HMWK4/index.html`
+
+To run the Homework 5 Python suite:
+```bash
+python3 HMWK5/welford.py
+```
+
 

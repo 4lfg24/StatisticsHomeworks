@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 5: Welford’s Recurrence Formulas — Online Mean, SS & Variance</title>
+  <meta name="description"
+    content="Mathematical derivation and implementation of Welford's recurrence formulas for online sum of squares and variance, following Knuth's approach for the mean. Featuring 3-line core Python code and interactive catastrophic cancellation laboratory.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Ambient Glow Orbs -->
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Sticky Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="../index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">
+            Welford Recurrence Lab
+            <span class="hw-tag">HMWK 5</span>
+          </h1>
+          <p class="subtitle">Online Mean, Sum of Squares & Numerical Variance Stability</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="#derivation" class="nav-link">Mathematical Derivation</a>
+        <a href="#core-code" class="nav-link">3-Line Logic</a>
+        <a href="#lab" class="nav-link">Streaming Lab</a>
+        <a href="#benchmark" class="nav-link">Catastrophic Cancellation</a>
+        <a href="../index.html" class="nav-link">← Hub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="app-container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-badge">Coursework in Statistics & Scientific Computing</div>
+      <h2 class="hero-title">
+        Welford’s Recurrence Formulas for
+        <span class="gradient-text">Online Mean, SS & Variance</span>
+      </h2>
+      <p class="hero-desc">
+        Deriving B. P. Welford's (1962) one-pass recurrence formulas for the Sum of Squares (<span class="math-sym">SS</span>)
+        and Variance (<span class="math-sym">s²</span>, <span class="math-sym">σ²</span>), following Donald Knuth's incremental
+        approach for the mean. Featuring a Python implementation whose core update logic requires only <strong>3 lines</strong>.
+      </p>
+    </section>
+
+    <!-- 3-LINE CODE SHOWCASE BANNER -->
+    <section id="core-code" class="highlight-banner">
+      <div class="banner-header">
+        <h3 class="banner-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="color: var(--emerald-light);">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          The 3-Line Core Recurrence Logic (Python)
+        </h3>
+        <span class="code-badge">O(1) Memory • O(1) Time</span>
+      </div>
+
+      <div class="code-box-3lines">
+        <div class="line">
+          <span class="line-num">1</span>
+          <span class="code-text"><span class="var">delta</span> <span class="op">=</span> <span class="var">x</span> <span class="op">-</span> <span class="var">mean</span> <span class="cm"># Error relative to previous mean x̄_{k-1}</span></span>
+        </div>
+        <div class="line">
+          <span class="line-num">2</span>
+          <span class="code-text"><span class="var">mean</span> <span class="op">+=</span> <span class="var">delta</span> <span class="op">/</span> <span class="var">count</span> <span class="cm"># Knuth's recurrence updates mean to x̄_k</span></span>
+        </div>
+        <div class="line">
+          <span class="line-num">3</span>
+          <span class="code-text"><span class="var">M2</span> <span class="op">+=</span> <span class="var">delta</span> <span class="op">*</span> (<span class="var">x</span> <span class="op">-</span> <span class="var">mean</span>) <span class="cm"># (x - mean) is now (x_k - x̄_k) -> exact Welford SS update!</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE STREAMING LAB -->
+    <section id="lab" class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">Interactive Simulation</div>
+        <h3 class="section-title">Live Online Stream Accumulator</h3>
+        <p class="section-desc">
+          Add single values or load preset streams to watch the 3-line recurrence update the running statistics in real time.
+        </p>
+      </div>
+
+      <div class="lab-grid">
+        <!-- Controls & Metrics -->
+        <div class="lab-panel">
+          <div class="controls-group">
+            <span class="control-label">Feed New Observation ($x_k$)</span>
+            <div class="input-row">
+              <input type="number" id="custom-val-input" class="text-input" placeholder="e.g. 18.5" step="any">
+              <button id="btn-add" class="btn">Feed $x$</button>
+            </div>
+          </div>
+
+          <div class="controls-group">
+            <span class="control-label">Quick Stream Presets</span>
+            <div class="btn-group">
+              <button id="btn-preset-std" class="btn btn-secondary">Standard [4, 7, 13, 16]</button>
+              <button id="btn-preset-norm" class="btn btn-secondary">50 Normal N(10, 9)</button>
+              <button id="btn-preset-offset" class="btn btn-secondary">Huge Offset 10⁹ + k</button>
+              <button id="btn-reset" class="btn btn-danger">Reset</button>
+            </div>
+          </div>
+
+          <!-- Metrics Display -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-title">Observations</span>
+                <span class="metric-formula">k</span>
+              </div>
+              <div id="metric-count" class="metric-value">0</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-title">Sample Mean</span>
+                <span class="metric-formula">x̄_k</span>
+              </div>
+              <div id="metric-mean" class="metric-value indigo">0.0000</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-title">Sum of Squares</span>
+                <span class="metric-formula">SS_k (M2)</span>
+              </div>
+              <div id="metric-m2" class="metric-value emerald">0.0000</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-title">Sample Variance</span>
+                <span class="metric-formula">s² = M2 / (k-1)</span>
+              </div>
+              <div id="metric-svar" class="metric-value amber">0.0000</div>
+            </div>
+
+            <div class="metric-card" style="grid-column: span 2;">
+              <div class="metric-header">
+                <span class="metric-title">Population Variance</span>
+                <span class="metric-formula">σ² = M2 / k</span>
+              </div>
+              <div id="metric-pvar" class="metric-value cyan">0.0000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Inspection Table -->
+        <div class="lab-panel">
+          <span class="control-label">Step-by-Step Recurrence Log</span>
+          <div class="stream-history-box">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>k</th>
+                  <th>Observation (x)</th>
+                  <th>Δ = x - x̄_{k-1}</th>
+                  <th>Mean (x̄_k)</th>
+                  <th>SS_k (M2)</th>
+                  <th>s² Variance</th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATASTROPHIC CANCELLATION BENCHMARK -->
+    <section id="benchmark" class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">Numerical Analysis</div>
+        <h3 class="section-title">Catastrophic Cancellation Benchmark</h3>
+        <p class="section-desc">
+          Compare Welford’s recurrence against the naive textbook one-pass formula <span class="math-sym">SS = \sum x² - (\sum x)²/n</span>
+          as data is shifted by a massive constant <span class="math-sym">C</span>. Because variance is translation-invariant
+          (<span class="math-sym">\operatorname{Var}(X + C) = \operatorname{Var}(X)</span>), the true variance of [1, 2, 3, 4, 5] is always <strong>2.500000</strong>.
+        </p>
+      </div>
+
+      <div class="cancellation-box">
+        <div class="slider-group">
+          <span class="control-label">Offset Magnitude Constant (C = 10^p):</span>
+          <div class="slider-container">
+            <input type="range" id="offset-slider" class="range-slider" min="0" max="11" step="0.5" value="9">
+            <span id="offset-display" style="font-family: var(--font-mono); font-weight: 700; color: var(--indigo-light); min-width: 140px;">
+              10^9.0
+            </span>
+          </div>
+
+          <p id="cancellation-note" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-md);">
+            <!-- Status message -->
+          </p>
+        </div>
+
+        <!-- Comparison Cards -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Welford Card -->
+          <div class="compare-card good">
+            <div class="compare-title">
+              <span>Welford’s Algorithm (One-Pass)</span>
+              <span class="badge-stable">Stable O(1)</span>
+            </div>
+            <div id="bench-welford-var" class="compare-val" style="color: var(--emerald-light);">2.500000</div>
+            <div class="error-meter">
+              <span style="color: var(--text-muted);">Absolute Error: <strong id="bench-welford-err" style="color: var(--emerald-light); font-family: var(--font-mono);">0.00e+00</strong></span>
+            </div>
+          </div>
+
+          <!-- Naive Card -->
+          <div class="compare-card bad">
+            <div class="compare-title">
+              <span>Textbook Formula: ∑x² - (∑x)²/n</span>
+              <span class="badge-unstable">Catastrophic Cancellation</span>
+            </div>
+            <div id="bench-naive-var" class="compare-val" style="color: var(--rose);">0.000000</div>
+            <div class="error-meter">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-muted);">Absolute Error: <strong id="bench-naive-err" style="color: var(--rose); font-family: var(--font-mono);">2.50e+00</strong></span>
+                <span id="naive-error-pct" style="color: var(--rose); font-weight: 700; font-family: var(--font-mono);">100.0% Error</span>
+              </div>
+              <div class="error-bar-bg">
+                <div id="naive-error-fill" class="error-bar-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPLETE MATHEMATICAL DERIVATION -->
+    <section id="derivation" class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">Rigorous Proof</div>
+        <h3 class="section-title">Complete Mathematical Derivation</h3>
+        <p class="section-desc">
+          Step-by-step algebraic development following Donald Knuth's mean recurrence to derive Welford's Sum of Squares and Variance formulas.
+        </p>
+      </div>
+
+      <!-- Step 1: Knuth's Mean -->
+      <div class="theory-block">
+        <h4 class="theory-heading">
+          <span class="theory-step-num">1</span>
+          Knuth’s Recurrence Formula for the Mean
+        </h4>
+        <p style="color: var(--text-muted);">
+          Let $x_1, x_2, \dots, x_k$ denote the sequence of observations. The sample mean of the first $k$ observations is:
+        </p>
+        <div class="math-display">
+          $$\bar{x}_k = \frac{1}{k} \sum_{i=1}^k x_i$$
+        </div>
+        <p style="color: var(--text-muted);">
+          Multiplying by $k$ and splitting off the $k$-th term:
+        </p>
+        <div class="math-display">
+          $$k \bar{x}_k = \sum_{i=1}^k x_i = \left(\sum_{i=1}^{k-1} x_i\right) + x_k = (k-1)\bar{x}_{k-1} + x_k$$
+        </div>
+        <p style="color: var(--text-muted);">
+          Rewriting $(k-1)\bar{x}_{k-1} = k\bar{x}_{k-1} - \bar{x}_{k-1}$ and dividing by $k$:
+        </p>
+        <div class="math-display">
+          $$k \bar{x}_k = k \bar{x}_{k-1} + (x_k - \bar{x}_{k-1}) \implies \mathbf{\bar{x}_k = \bar{x}_{k-1} + \frac{x_k - \bar{x}_{k-1}}{k}}$$
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          <strong>Crucial algebraic corollary:</strong> The difference between $x_k$ and the <em>new</em> mean $\bar{x}_k$ satisfies:
+        </p>
+        <div class="math-display">
+          $$x_k - \bar{x}_k = x_k - \left(\bar{x}_{k-1} + \frac{x_k - \bar{x}_{k-1}}{k}\right) = (x_k - \bar{x}_{k-1}) - \frac{x_k - \bar{x}_{k-1}}{k} = \mathbf{\left(\frac{k-1}{k}\right)(x_k - \bar{x}_{k-1})}$$
+        </div>
+      </div>
+
+      <!-- Step 2: Sum of Squares -->
+      <div class="theory-block">
+        <h4 class="theory-heading">
+          <span class="theory-step-num">2</span>
+          Welford’s Recurrence Formula for Sum of Squares ($SS_k$)
+        </h4>
+        <p style="color: var(--text-muted);">
+          The sum of squared deviations from the mean for the first $k$ values is defined as:
+        </p>
+        <div class="math-display">
+          $$SS_k = \sum_{i=1}^k (x_i - \bar{x}_k)^2$$
+        </div>
+        <p style="color: var(--text-muted);">
+          Following Knuth’s approach, express the deviation $(x_i - \bar{x}_k)$ relative to the previous mean $\bar{x}_{k-1}$:
+        </p>
+        <div class="math-display">
+          $$x_i - \bar{x}_k = (x_i - \bar{x}_{k-1}) + (\bar{x}_{k-1} - \bar{x}_k)$$
+        </div>
+        <p style="color: var(--text-muted);">
+          Squaring and summing over all $i = 1, \dots, k$:
+        </p>
+        <div class="math-display">
+          $$SS_k = \sum_{i=1}^k (x_i - \bar{x}_k)^2 = \underbrace{\sum_{i=1}^k (x_i - \bar{x}_{k-1})^2}_{\text{Term 1}} + \underbrace{2(\bar{x}_{k-1} - \bar{x}_k) \sum_{i=1}^k (x_i - \bar{x}_{k-1})}_{\text{Term 2}} + \underbrace{\sum_{i=1}^k (\bar{x}_{k-1} - \bar{x}_k)^2}_{\text{Term 3}}$$
+        </div>
+
+        <div class="term-breakdown">
+          <div class="term-card">
+            <span class="term-title">Term 1 Evaluation</span>
+            <div class="term-formula">SS_{k-1} + (x_k - x̄_{k-1})²</div>
+            <div class="term-desc">
+              Splitting the sum into the first $k-1$ elements (which is identically $SS_{k-1}$) plus the $k$-th element $(x_k - \bar{x}_{k-1})^2$.
+            </div>
+          </div>
+
+          <div class="term-card">
+            <span class="term-title">Term 2 Evaluation</span>
+            <div class="term-formula">- (2/k)(x_k - x̄_{k-1})²</div>
+            <div class="term-desc">
+              Because $\sum_{i=1}^{k-1}(x_i - \bar{x}_{k-1}) = 0$, the sum collapses to $x_k - \bar{x}_{k-1}$. Multiplying by $2(\bar{x}_{k-1} - \bar{x}_k) = -2\frac{x_k - \bar{x}_{k-1}}{k}$ gives $- \frac{2}{k}(x_k - \bar{x}_{k-1})^2$.
+            </div>
+          </div>
+
+          <div class="term-card">
+            <span class="term-title">Term 3 Evaluation</span>
+            <div class="term-formula">+ (1/k)(x_k - x̄_{k-1})²</div>
+            <div class="term-desc">
+              Summing the constant $(\bar{x}_{k-1} - \bar{x}_k)^2$ across $k$ terms gives $k \cdot \left(-\frac{x_k - \bar{x}_{k-1}}{k}\right)^2 = \frac{1}{k}(x_k - \bar{x}_{k-1})^2$.
+            </div>
+          </div>
+        </div>
+
+        <p style="color: var(--text-muted);">
+          Adding Terms 1, 2, and 3 together:
+        </p>
+        <div class="math-display">
+          $$SS_k = SS_{k-1} + (x_k - \bar{x}_{k-1})^2 \left( 1 - \frac{2}{k} + \frac{1}{k} \right) = SS_{k-1} + \left( \frac{k-1}{k} \right) (x_k - \bar{x}_{k-1})^2$$
+        </div>
+        <p style="color: var(--text-muted);">
+          Using the corollary $\frac{k-1}{k}(x_k - \bar{x}_{k-1}) = x_k - \bar{x}_k$, we arrive at the symmetric Welford product:
+        </p>
+        <div class="math-display">
+          $$\mathbf{SS_k = SS_{k-1} + (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k)}$$
+        </div>
+      </div>
+
+      <!-- Step 3: Variance Recurrences -->
+      <div class="theory-block">
+        <h4 class="theory-heading">
+          <span class="theory-step-num">3</span>
+          Recurrence Formulas for Sample & Population Variance
+        </h4>
+        <div class="math-display">
+          <strong>Sample Variance ($s_k^2 = \frac{SS_k}{k-1}$):</strong><br>
+          $$(k-1)s_k^2 = (k-2)s_{k-1}^2 + (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k)$$
+          $$s_k^2 = s_{k-1}^2 + \frac{1}{k-1} \left[ (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k) - s_{k-1}^2 \right]$$
+          <br>
+          <strong>Population Variance ($\sigma_k^2 = \frac{SS_k}{k}$):</strong><br>
+          $$k\sigma_k^2 = (k-1)\sigma_{k-1}^2 + (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k)$$
+          $$\sigma_k^2 = \sigma_{k-1}^2 + \frac{1}{k} \left[ (x_k - \bar{x}_{k-1})(x_k - \bar{x}_k) - \sigma_{k-1}^2 \right]$$
+        </div>
+      </div>
+    </section>
+
+    <!-- PYTHON CODE REPOSITORY FILE LINK -->
+    <section class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">Source Code Artifact</div>
+        <h3 class="section-title">Complete Python Implementation (welford.py)</h3>
+        <p class="section-desc">
+          Located inside <span class="math-sym">HMWK5/welford.py</span>. Includes core functions, OOP streaming accumulator, unit tests, and the catastrophic cancellation benchmark.
+        </p>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-filename">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            HMWK5/welford.py
+          </span>
+          <span style="font-size: 0.78rem; color: var(--text-dim); font-family: var(--font-mono);">Python 3.12+</span>
+        </div>
+        <pre class="code-pre"><code><span style="color:#64748b;"># The exact 3-line core logic inside an accumulator:</span>
+<span style="color:#f43f5e;">for</span> x <span style="color:#f43f5e;">in</span> data:
+    count += <span style="color:#38bdf8;">1</span>
+    <span style="color:#64748b;"># ---------------------------------------------</span>
+    delta = x - mean
+    mean += delta / count
+    M2 += delta * (x - mean)
+    <span style="color:#64748b;"># ---------------------------------------------</span>
+
+sample_variance = M2 / (count - <span style="color:#38bdf8;">1</span>) <span style="color:#f43f5e;">if</span> count > <span style="color:#38bdf8;">1</span> <span style="color:#f43f5e;">else</span> <span style="color:#38bdf8;">0.0</span></code></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>Statistics & Cryptography Research Suite — Homework 5</strong></p>
+        <p>Welford’s Recurrence Algorithm for Mean, Sum of Squares, and Variance | Coursework by 4lfg24</p>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html">Master Hub</a>
+        <a href="../HMWK1/index.html">HMWK 1</a>
+        <a href="../HMWK2/index.html">HMWK 2</a>
+        <a href="../HMWK3/index.html">HMWK 3</a>
+        <a href="../HMWK4/index.html">HMWK 4</a>
+        <a href="https://github.com/4lfg24/StatisticsHomeworks" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
