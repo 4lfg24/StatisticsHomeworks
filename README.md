@@ -24,6 +24,16 @@ Interactive research suites and computational laboratories for Statistics and Cr
     - Security scaling calculator from 4-bit toy curve to 256-bit secp256k1 (proving standard ECC requires $\approx 18.2$ billion years across the entire global Bitcoin network).
     - Analysis of structural vulnerabilities: Pohlig-Hellman attack on composite order ($n=18=2 \times 3^2$), small subgroup confinement, and ciphertext malleability.
 
+- **[HMWK4](HMWK4/index.html)**: **Homework 4 — Stochastic Penetration Dynamics: LLN, Variance Scaling & Central Limit Theorem**:
+  - Interactive multi-attacker adversarial penetration simulator across $n$ enterprise systems and $m$ attackers.
+  - Comparative study of the **Bernoulli Model** ($X_i \in \{0, 1\}$, $P(X_i = 1) = p$) vs symmetric zero-mean **Rademacher Model** ($X_i \in \{-1, +1\}$, $P(X_i = \pm 1) = 1/2$).
+  - Asymptotic exploration of the trichotomy of variance across the three normalizations:
+    - **Total score**: $S_n = \sum X_i$ with linear variance growth $\mathrm{Var}(S_n) = O(n)$ and diffusive standard deviation $\sigma \sqrt{n}$.
+    - **Average score**: $S_n/n = (1/n)\sum X_i$ with vanishing variance $\mathrm{Var}(S_n/n) = O(1/n)$ and convergence in probability by the Law of Large Numbers (LLN) verified via Chebyshev's bound.
+    - **Normalized total score**: $S_n/\sqrt{n} = (1/\sqrt{n})\sum X_i$ with invariant variance $\mathrm{Var}(S_n/\sqrt{n}) = O(1)$ and convergence in distribution to standard Gaussian $\mathcal{N}(0, 1)$ by the Central Limit Theorem (CLT) in the Rademacher case.
+  - Live interactive suite featuring sample trajectory explorer with $\pm 1\sigma$ and $\pm 2\sigma$ confidence funnels, terminal probability distribution histogram & ECDF vs Gaussian $\Phi(z)$, variance scaling benchmark (linear & log-log slopes), LLN violation vs Chebyshev bound, and Gaussian Q-Q plot with Kolmogorov-Smirnov test.
+  - Cybersecurity operational risk analysis: system size $n$ predictability vs collective threat load $T_{m,n}$, and Extreme Value Theory (EVT) analysis of the worst-case attacker $\max_j S_n^{(j)}$.
+
 ## How to Run
 
 Open any of the HTML files directly in your web browser, or serve locally using any standard static file server:
@@ -33,7 +43,8 @@ python3 -m http.server 8000
 ```
 
 Then visit:
-- Home Hub: `http://localhost:8000/HMWK3/index.html`
-- Task 1: `http://localhost:8000/HMWK3/task1.html`
-- Task 2: `http://localhost:8000/HMWK3/task2.html`
-- Task 3: `http://localhost:8000/HMWK3/task3.html`
+- HMWK 1: `http://localhost:8000/HMWK1/index.html`
+- HMWK 2: `http://localhost:8000/HMWK2/index.html`
+- HMWK 3: `http://localhost:8000/HMWK3/index.html`
+- HMWK 4: `http://localhost:8000/HMWK4/index.html`
+

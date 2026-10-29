@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 4: Stochastic Penetration Dynamics — LLN, Variance Scaling & Central Limit Theorem</title>
+  <meta name="description"
+    content="Interactive research laboratory simulating multi-attacker penetration processes across n systems using Bernoulli and Rademacher stochastic processes. Rigorous study of Total Score (S_n), Average Score (S_n/n), Normalized Score (S_n/√n), Law of Large Numbers, and Central Limit Theorem.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Ambient Glow Background -->
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Sticky Header & Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">
+            Stochastic Penetration Lab
+            <span class="hw-tag">HMWK 4</span>
+          </h1>
+          <p class="subtitle">Adversarial Intrusion Processes, Variance Trichotomy & Limit Theorems</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="#lab" class="nav-pill active">Simulation Lab</a>
+        <a href="#trajectories" class="nav-pill">Trajectories</a>
+        <a href="#distribution" class="nav-pill">Distributions</a>
+        <a href="#variance" class="nav-pill">Variance Scaling</a>
+        <a href="#diagnostics" class="nav-pill">LLN & CLT</a>
+        <a href="#metrics" class="nav-pill">Metrics</a>
+        <a href="#theory" class="nav-pill">Theoretical Synthesis</a>
+        <a href="../HMWK1/index.html" class="nav-pill external" title="Elliptic Curves">HMWK 1 ↗</a>
+        <a href="../HMWK2/index.html" class="nav-pill external" title="Ethereum Cryptography">HMWK 2 ↗</a>
+        <a href="../HMWK3/index.html" class="nav-pill external" title="Cryptanalysis Hub">HMWK 3 ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- HERO SECTION -->
+    <section class="hero-banner">
+      <div class="hero-badge-row">
+        <div class="hero-badge">
+          <span class="hero-badge-pulse"></span>
+          Statistics Coursework — Assignment 4: Stochastic Processes
+        </div>
+        <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">
+          Monte Carlo Simulation & Asymptotic Analysis
+        </span>
+      </div>
+
+      <h1 class="hero-title">
+        The Geometry of Random Walks: <br>
+        <span class="gradient-text">LLN, Variance Scaling & The Central Limit Theorem</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Consider <span class="math-sym">n</span> enterprise systems under attack by <span class="math-sym">m</span>
+        independent attackers. We model the adversarial intrusion process as a discrete-time stochastic process with
+        independent and identically distributed (i.i.d.) increments <span class="math-sym">X₁, X₂, …, Xₙ</span>.
+        We contrast the asymmetric <strong>Bernoulli model</strong> (<span class="math-sym">Xᵢ ∈ {0, 1}</span>, success
+        probability <span class="math-sym">p</span>) with the symmetric zero-mean <strong>Rademacher model</strong>
+        (<span class="math-sym">Xᵢ ∈ {−1, +1}</span>, probability <span class="math-sym">1/2</span>), tracing the
+        fundamental trichotomy of variance across total, average, and diffusive normalizations.
+      </p>
+
+      <!-- Three Core Quantities Equation Strip -->
+      <div class="math-strip">
+        <!-- Total Score S_n -->
+        <div class="math-strip-card">
+          <div class="math-strip-icon icon-blue">Sₙ</div>
+          <div class="math-strip-content">
+            <h4>Total Cumulative Score</h4>
+            <div class="math-formula">Sₙ = ∑ᵢ₌₁ⁿ Xᵢ</div>
+            <div class="math-behavior">
+              <strong>Variance:</strong> <span class="math-sym">Var = n σ² = O(n)</span> (Diverges linearly).
+              Diffusive spread expands as <span class="math-sym">√n</span>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Average Score S_n/n -->
+        <div class="math-strip-card">
+          <div class="math-strip-icon icon-cyan">S̄ₙ</div>
+          <div class="math-strip-content">
+            <h4>Average Score (Breach Rate)</h4>
+            <div class="math-formula">S̄ₙ = (1/n) ∑ᵢ₌₁ⁿ Xᵢ</div>
+            <div class="math-behavior">
+              <strong>Variance:</strong> <span class="math-sym">Var = σ²/n = O(1/n)</span> (Vanishes).
+              Converges in probability to <span class="math-sym">μ</span> (Law of Large Numbers).
+            </div>
+          </div>
+        </div>
+
+        <!-- Normalized Score S_n/√n -->
+        <div class="math-strip-card">
+          <div class="math-strip-icon icon-emerald">Zₙ</div>
+          <div class="math-strip-content">
+            <h4>Normalized Total Score</h4>
+            <div class="math-formula">Zₙ = (1/√n) ∑ᵢ₌₁ⁿ Xᵢ</div>
+            <div class="math-behavior">
+              <strong>Variance:</strong> <span class="math-sym">Var = σ² = O(1)</span> (Invariant homeostasis).
+              Converges in distribution to <span class="math-sym">𝒩(0, 1)</span> (Central Limit Theorem).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESET SCENARIOS BAR -->
+    <section class="presets-bar">
+      <div class="presets-label">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        Scenario Presets:
+      </div>
+      <div class="preset-pills">
+        <button class="preset-btn active" data-preset="balanced">
+          🎯 Balanced Rademacher (n=500, m=400, μ=0)
+        </button>
+        <button class="preset-btn" data-preset="asymmetric">
+          ⚡ High-Asymmetry Breach (n=600, m=400, p=0.75)
+        </button>
+        <button class="preset-btn" data-preset="hardened">
+          🛡️ Hardened Network / Low-Vulnerability APT (n=800, m=500, p=0.12)
+        </button>
+        <button class="preset-btn" data-preset="enterprise">
+          🏢 Mega-Scale Enterprise (n=1500, m=800, μ=0)
+        </button>
+        <button class="preset-btn" data-preset="rapid">
+          🎲 Rapid Benchmark (n=150, m=200)
+        </button>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE SIMULATION LAB DASHBOARD -->
+    <section class="lab-dashboard" id="lab">
+
+      <!-- LEFT SIDEBAR: CONTROLS & PARAMETERS -->
+      <aside class="panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+              <rect x="9" y="9" width="6" height="6"></rect>
+              <line x1="9" y1="1" x2="9" y2="4"></line>
+              <line x1="15" y1="1" x2="15" y2="4"></line>
+              <line x1="9" y1="20" x2="9" y2="23"></line>
+              <line x1="15" y1="20" x2="15" y2="23"></line>
+              <line x1="20" y1="9" x2="23" y2="9"></line>
+              <line x1="20" y1="14" x2="23" y2="14"></line>
+              <line x1="1" y1="9" x2="4" y2="9"></line>
+              <line x1="1" y1="14" x2="4" y2="14"></line>
+            </svg>
+            Model Parameters
+          </h2>
+          <span class="param-badge">Monte Carlo</span>
+        </div>
+
+        <!-- Model Selection Switch -->
+        <div class="model-switch" role="tablist">
+          <button class="model-tab active" data-model="rademacher" role="tab">
+            <span>Rademacher Model</span>
+            <span class="tab-sub">Xᵢ ∈ {−1, +1}, μ = 0</span>
+          </button>
+          <button class="model-tab" data-model="bernoulli" role="tab">
+            <span>Bernoulli Model</span>
+            <span class="tab-sub">Xᵢ ∈ {0, 1}, P(X=1) = p</span>
+          </button>
+        </div>
+
+        <!-- Slider: Number of Systems (n) -->
+        <div class="control-group">
+          <div class="control-label-row">
+            <label class="control-label" for="slider-n">
+              Number of Systems <span class="param-badge">n</span>
+            </label>
+            <div class="control-val-box">
+              <input type="number" id="input-n" class="num-input" min="10" max="2000" step="10" value="300">
+            </div>
+          </div>
+          <input type="range" id="slider-n" class="slider-range" min="10" max="2000" step="10" value="300">
+          <div class="control-hint">Number of sequential penetration attempts / system target surface</div>
+        </div>
+
+        <!-- Slider: Number of Attackers (m) -->
+        <div class="control-group">
+          <div class="control-label-row">
+            <label class="control-label" for="slider-m">
+              Number of Attackers <span class="param-badge">m</span>
+            </label>
+            <div class="control-val-box">
+              <input type="number" id="input-m" class="num-input" min="10" max="3000" step="10" value="400">
+            </div>
+          </div>
+          <input type="range" id="slider-m" class="slider-range" min="10" max="3000" step="10" value="400">
+          <div class="control-hint">Number of independent sample paths / attacker collective trajectories</div>
+        </div>
+
+        <!-- Slider: Bernoulli Probability (p) -->
+        <div class="control-group" id="control-group-p" style="display: none;">
+          <div class="control-label-row">
+            <label class="control-label" for="slider-p">
+              Breach Probability <span class="param-badge">p</span>
+            </label>
+            <div class="control-val-box">
+              <input type="number" id="input-p" class="num-input" min="0.05" max="0.95" step="0.01" value="0.50">
+            </div>
+          </div>
+          <input type="range" id="slider-p" class="slider-range" min="0.05" max="0.95" step="0.01" value="0.50">
+          <div class="control-hint">Per-system vulnerability exploitation likelihood P(Xᵢ = 1)</div>
+        </div>
+
+        <!-- Slider: LLN Error Tolerance (epsilon) -->
+        <div class="control-group">
+          <div class="control-label-row">
+            <label class="control-label" for="slider-eps">
+              LLN Error Tolerance <span class="param-badge">ε</span>
+            </label>
+            <div class="control-val-box">
+              <input type="number" id="input-eps" class="num-input" min="0.01" max="0.20" step="0.005" value="0.05">
+            </div>
+          </div>
+          <input type="range" id="slider-eps" class="slider-range" min="0.01" max="0.20" step="0.005" value="0.05">
+          <div class="control-hint">Neighborhood radius for convergence in probability P(|S̄ₖ − μ| ≥ ε)</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-grid">
+          <button class="btn btn-primary" id="btn-run-sim">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Run Monte Carlo Simulation
+          </button>
+          <button class="btn btn-secondary" id="btn-play-anim">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Play Trajectories
+          </button>
+          <button class="btn btn-secondary" id="btn-reset-sim">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
+              <path d="M22 11.5A10 10 0 0 0 3.2 7.2L2.5 8M2 12.5a10 10 0 0 0 18.8 4.3l.7-.8"></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+
+        <!-- Animation Progress Bar & Speed -->
+        <div class="anim-bar">
+          <div class="anim-status">
+            <span class="anim-progress-text" id="anim-progress-text">Step 300 / 300</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Speed:</span>
+            <select id="select-anim-speed" class="speed-select">
+              <option value="1">1x</option>
+              <option value="2">2x</option>
+              <option value="5" selected>5x</option>
+              <option value="10">10x</option>
+              <option value="25">25x</option>
+            </select>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: PRIMARY VISUALIZATIONS -->
+      <div class="vis-main-container">
+
+        <!-- Quantity Selector Toolbar -->
+        <div class="qty-selector-bar">
+          <div class="qty-tabs" role="tablist">
+            <button class="qty-tab active" data-qty="raw_norm">
+              <span>Normalized Total Score</span>
+              <span class="badge">Sₖ/√k</span>
+            </button>
+            <button class="qty-tab" data-qty="average">
+              <span>Average Score</span>
+              <span class="badge">Sₖ/k</span>
+            </button>
+            <button class="qty-tab" data-qty="total">
+              <span>Total Score</span>
+              <span class="badge">Sₖ</span>
+            </button>
+            <button class="qty-tab" data-qty="std_norm">
+              <span>Standardized CLT</span>
+              <span class="badge">(Sₖ−kμ)/(σ√k)</span>
+            </button>
+          </div>
+
+          <div class="canvas-toolbar">
+            <label class="tool-toggle">
+              <input type="checkbox" id="check-show-bands" checked>
+              <span>Confidence Bands (±1σ, ±2σ)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- CHART 1: SAMPLE TRAJECTORY EXPLORER -->
+        <article class="chart-card" id="trajectories">
+          <div class="chart-header">
+            <div class="chart-title-group">
+              <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3v18h18"></path>
+                  <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                </svg>
+                Sample Trajectories Visualizer (k = 0 … n)
+              </h3>
+              <p class="chart-desc">
+                Interactive realization of attacker penetration trajectories over time. Demonstrates fanning out (Total
+                Score), collapse of measure into the mean (Average Score), or constant variance invariant corridor
+                (Normalized Score).
+              </p>
+            </div>
+
+            <!-- Legend -->
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-line" style="background: #f59e0b; border-bottom: 2px dashed #f59e0b;"></span>
+                <span>Theory E[Yₖ]</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-line" style="background: #f43f5e;"></span>
+                <span>Sample Mean μ̂ₖ</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot dot-sigma1"></span>
+                <span>±1σ Funnel</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot dot-sigma2"></span>
+                <span>±2σ Funnel</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot dot-trajectory"></span>
+                <span>Attacker Paths</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="canvas-wrapper">
+            <canvas id="trajectory-canvas"></canvas>
+          </div>
+        </article>
+
+        <!-- CHART 2: TERMINAL DISTRIBUTION (HISTOGRAM / CDF) -->
+        <article class="chart-card" id="distribution">
+          <div class="chart-header">
+            <div class="chart-title-group">
+              <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="12" width="4" height="8"></rect>
+                  <rect x="10" y="8" width="4" height="12"></rect>
+                  <rect x="17" y="4" width="4" height="16"></rect>
+                </svg>
+                Terminal Distribution at Step n (Across m Attackers)
+              </h3>
+              <p class="chart-desc">
+                Empirical probability density histogram overlaid with theoretical continuous Gaussian distribution
+                <span class="math-sym">𝒩(E[Yₙ], Var(Yₙ))</span>. Observe the bell-shaped CLT conformity.
+              </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <button class="btn btn-secondary" id="btn-toggle-hist-mode" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+                Switch to CDF
+              </button>
+            </div>
+          </div>
+
+          <div class="canvas-wrapper compact">
+            <canvas id="dist-canvas"></canvas>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- TWIN CHART GRID: VARIANCE SCALING & DIAGNOSTICS -->
+    <section class="chart-twin-grid">
+
+      <!-- CHART 3: VARIANCE SCALING BENCHMARK -->
+      <article class="chart-card" id="variance">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              Variance Scaling Across Systems k ∈ [1, n]
+            </h3>
+            <p class="chart-desc">
+              Empirical verification of the variance scaling orders: Linear divergence <span class="math-sym">O(n)</span>,
+              Hyperbolic decay <span class="math-sym">O(1/n)</span>, and Homeostatic invariance <span class="math-sym">O(1)</span>.
+            </p>
+          </div>
+
+          <button class="btn btn-secondary" id="btn-toggle-scale-mode" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+            Log-Log View (Slopes)
+          </button>
+        </div>
+
+        <div class="canvas-wrapper compact">
+          <canvas id="variance-canvas"></canvas>
+        </div>
+      </article>
+
+      <!-- CHART 4: CONVERGENCE DIAGNOSTICS (LLN & CLT) -->
+      <article class="chart-card" id="diagnostics">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Asymptotic Diagnostics: LLN & CLT
+            </h3>
+            <p class="chart-desc">
+              Validate convergence in probability via Chebyshev's bound and examine normality via Gaussian Q-Q plot.
+            </p>
+          </div>
+
+          <div class="qty-tabs" style="gap: 0.35rem;">
+            <button class="qty-tab active diag-tab" data-diag="lln" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+              LLN P(|S̄ₖ−μ|≥ε)
+            </button>
+            <button class="qty-tab diag-tab" data-diag="clt" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+              CLT Normal Q-Q
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper compact">
+          <canvas id="diag-canvas"></canvas>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- LIVE METRICS & COMPARATIVE DATA MATRIX -->
+    <section class="metrics-section" id="metrics">
+      <div class="section-title-bar">
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20v-6M6 20V10M18 20V4"></path>
+          </svg>
+          Real-Time Numerical Verification Matrix
+        </h2>
+        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+          Evaluated at Step n across all m Attackers
+        </span>
+      </div>
+
+      <!-- Live Stat Cards Grid -->
+      <div class="metrics-grid">
+        <!-- Expected Value -->
+        <div class="metric-stat-card card-indigo">
+          <div class="stat-label">
+            <span>Expected Value E[Y]</span>
+            <span id="stat-mean-badge"></span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-mean">0.000</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-mean">Theory: 0.000</span>
+            <span>Sample Mean</span>
+          </div>
+        </div>
+
+        <!-- Variance -->
+        <div class="metric-stat-card card-cyan">
+          <div class="stat-label">
+            <span>Variance Var(Y)</span>
+            <span id="stat-var-badge"></span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-var">1.000</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-var">Theory: 1.000</span>
+            <span>Sample Variance s²</span>
+          </div>
+        </div>
+
+        <!-- Standard Deviation -->
+        <div class="metric-stat-card card-emerald">
+          <div class="stat-label">
+            <span>Std Dev σ(Y)</span>
+            <span id="stat-std-badge"></span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-std">1.000</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-std">Theory: 1.000</span>
+            <span>Spread Scale</span>
+          </div>
+        </div>
+
+        <!-- Skewness & Kurtosis -->
+        <div class="metric-stat-card card-violet">
+          <div class="stat-label">
+            <span>Skewness γ₁</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-code);">Symmetry</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-skew">0.000</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-skew">Theory: 0.000</span>
+            <span>Fisher-Pearson</span>
+          </div>
+        </div>
+
+        <!-- Excess Kurtosis -->
+        <div class="metric-stat-card card-amber">
+          <div class="stat-label">
+            <span>Excess Kurtosis γ₂</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-code);">Tail Weight</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-kurt">-0.007</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-kurt">Theory: 0.000</span>
+            <span>Gaussian = 0</span>
+          </div>
+        </div>
+
+        <!-- Kolmogorov-Smirnov Distance -->
+        <div class="metric-stat-card card-rose">
+          <div class="stat-label">
+            <span>K-S Distance Dₙ</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--rose-light);">Normality</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-ks">0.024</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val">sup |Fₙ(z) − Φ(z)|</span>
+            <span>Berry-Esseen Limit</span>
+          </div>
+        </div>
+
+        <!-- Empirical Coverage 1-Sigma -->
+        <div class="metric-stat-card card-emerald">
+          <div class="stat-label">
+            <span>Empirical ±1σ Coverage</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--emerald-light);">68.27% Rule</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-sigma1">68.5%</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val">Gaussian: 68.27%</span>
+            <span>Inner Corridor</span>
+          </div>
+        </div>
+
+        <!-- Empirical Coverage 2-Sigma -->
+        <div class="metric-stat-card card-cyan">
+          <div class="stat-label">
+            <span>Empirical ±2σ Coverage</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan);">95.45% Rule</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-sigma2">95.2%</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val">Gaussian: 95.45%</span>
+            <span>Outer Corridor</span>
+          </div>
+        </div>
+
+        <!-- Worst-Case Attacker Breach -->
+        <div class="metric-stat-card card-rose">
+          <div class="stat-label">
+            <span>Worst Attacker Max Sₙ</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--rose-light);">Tail Risk</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-worst-attacker">0.00</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-exp-worst">EVT Theory: 0.00</span>
+            <span>Extreme Value Max</span>
+          </div>
+        </div>
+
+        <!-- Aggregate Threat Exposure -->
+        <div class="metric-stat-card card-indigo">
+          <div class="stat-label">
+            <span>Collective Exposure Tₘ,ₙ</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--indigo-light);">Total Breaches</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-aggregate">0</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-theo-aggregate">Theory: 0</span>
+            <span>∑ⱼ₌₁ᵐ Sₙ⁽ʲ⁾</span>
+          </div>
+        </div>
+
+        <!-- LLN Error Rate -->
+        <div class="metric-stat-card card-amber">
+          <div class="stat-label">
+            <span>LLN Error Rate P(|S̄ₙ−μ|≥ε)</span>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--amber-light);">Chebyshev</span>
+          </div>
+          <div class="stat-val-row">
+            <span class="stat-primary-val" id="stat-lln-emp">0.00%</span>
+          </div>
+          <div class="stat-sub-row">
+            <span class="stat-theo-val" id="stat-chebyshev">Bound ≤ 0.00%</span>
+            <span>Fraction Violating ε</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comprehensive Comparison Table -->
+      <div class="data-table-card">
+        <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-main);">
+          Theoretical Comparison of the Three Normalizations
+        </h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Quantity</th>
+              <th>Normalization Formula</th>
+              <th>Expected Value E[Yₙ]</th>
+              <th>Variance Var(Yₙ)</th>
+              <th>Scaling Order</th>
+              <th>Asymptotic Regime (n → ∞)</th>
+              <th>Cybersecurity Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Total Score</strong></td>
+              <td class="td-mono">Sₙ = ∑ Xᵢ</td>
+              <td class="td-mono">Bernoulli: n p<br>Rademacher: 0</td>
+              <td class="td-mono">Bernoulli: n p(1−p)<br>Rademacher: n</td>
+              <td><span class="badge-pill indigo">O(n) Divergent</span></td>
+              <td>Spread grows as √n; trajectories diverge without bound</td>
+              <td>Cumulative volume of network compromises across enterprise targets</td>
+            </tr>
+            <tr>
+              <td><strong>Average Score</strong></td>
+              <td class="td-mono">S̄ₙ = (1/n) ∑ Xᵢ</td>
+              <td class="td-mono">Bernoulli: p<br>Rademacher: 0</td>
+              <td class="td-mono">Bernoulli: p(1−p)/n<br>Rademacher: 1/n</td>
+              <td><span class="badge-pill cyan">O(1/n) Vanishing</span></td>
+              <td>Law of Large Numbers: collapses to deterministic constant μ</td>
+              <td>Per-system vulnerability density; highly predictable breach rate</td>
+            </tr>
+            <tr>
+              <td><strong>Normalized Total Score</strong></td>
+              <td class="td-mono">Zₙ = (1/√n) ∑ Xᵢ</td>
+              <td class="td-mono">Bernoulli: p √n<br>Rademacher: 0</td>
+              <td class="td-mono">Bernoulli: p(1−p)<br>Rademacher: 1</td>
+              <td><span class="badge-pill emerald">O(1) Homeostatic</span></td>
+              <td>Central Limit Theorem: converges to 𝒩(0, 1) in Rademacher</td>
+              <td>Diffusive fluctuation scale; measures relative adversarial advantage</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- IN-DEPTH THEORETICAL & CYBERSECURITY EXPOSITION -->
+    <section class="theory-section" id="theory">
+      <div class="section-title-bar">
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          Mathematical Foundations & Security Architecture Analysis
+        </h2>
+      </div>
+
+      <div class="theory-grid">
+
+        <!-- CARD 1: STOCHASTIC PROCESS FORMULATION -->
+        <article class="theory-card">
+          <div class="theory-badge-row">
+            <span class="theory-tag math">Mathematical Foundations</span>
+            <span class="theory-tag stat">Stochastic Modeling</span>
+          </div>
+          <h3>1. Stochastic Modeling of the Penetration Process</h3>
+          <p>
+            Let <span class="math-sym">(Ω, ℱ, ℙ)</span> be a complete probability space equipped with discrete-time
+            filtration <span class="math-sym">ℱₙ = σ(X₁, …, Xₙ)</span> representing the historical information of the
+            penetration process up to step <span class="math-sym">n</span>. We model the adversarial penetration score
+            as a sum of independent and identically distributed (i.i.d.) random increments:
+          </p>
+
+          <div class="math-block">
+            Sₙ = ∑ᵢ₌₁ⁿ Xᵢ, \quad S₀ = 0
+          </div>
+
+          <p>Two distinct operational models govern the increment <span class="math-sym">Xᵢ</span>:</p>
+          <ul>
+            <li>
+              <strong>Bernoulli Model (<span class="math-sym">Xᵢ ∈ {0, 1}</span>):</strong>
+              Models binary exploit attempts where <span class="math-sym">1</span> represents a compromised target
+              node and <span class="math-sym">0</span> indicates a thwarted attempt.
+              The expected value is <span class="math-sym">E[Xᵢ] = μ = p</span> and the single-step variance is
+              <span class="math-sym">Var(Xᵢ) = σ² = p(1−p)</span>.
+              Because <span class="math-sym">p > 0</span>, the trajectory exhibits an intrinsic linear upward drift.
+            </li>
+            <li>
+              <strong>Rademacher Model (<span class="math-sym">Xᵢ ∈ {−1, +1}</span>):</strong>
+              Models a symmetric, zero-sum adversarial game where <span class="math-sym">+1</span> denotes an attacker
+              foothold and <span class="math-sym">−1</span> denotes an automated honeypot trap or blue-team quarantine
+              event. Increments have equal probability <span class="math-sym">ℙ(Xᵢ = +1) = ℙ(Xᵢ = −1) = 1/2</span>.
+              The expected value is <span class="math-sym">E[Xᵢ] = μ = 0</span> and the variance is
+              <span class="math-sym">Var(Xᵢ) = σ² = 1</span>.
+            </li>
+          </ul>
+
+          <div class="math-block">
+            \text{Martingale Property (Rademacher):} \quad E[Sₙ₊₁ \mid ℱₙ] = Sₙ + E[Xₙ₊₁] = Sₙ
+          </div>
+          <p>
+            The Rademacher trajectory forms a classical <strong>discrete-time martingale</strong>: given current state
+            <span class="math-sym">Sₙ</span>, the best forecast for any future score is precisely
+            <span class="math-sym">Sₙ</span>.
+          </p>
+        </article>
+
+        <!-- CARD 2: TRICHOTOMY OF VARIANCE -->
+        <article class="theory-card">
+          <div class="theory-badge-row">
+            <span class="theory-tag math">Variance Scaling</span>
+            <span class="theory-tag stat">Asymptotic Orders</span>
+          </div>
+          <h3>2. Normalizations & The Trichotomy of Variance</h3>
+          <p>
+            By applying scaling factor <span class="math-sym">n⁻ᵅ</span> to the cumulative sum
+            <span class="math-sym">Sₙ</span>, we uncover three fundamentally distinct asymptotic behaviors as
+            <span class="math-sym">n → ∞</span>:
+          </p>
+
+          <div class="math-block">
+            \text{For } Yₙ = n^{-α} Sₙ: \quad Var(Yₙ) = Var\left(n^{-α} ∑ᵢ₌₁ⁿ Xᵢ\right) = n^{-2α} ∑ᵢ₌₁ⁿ Var(Xᵢ) = σ² n^{1 - 2α}
+          </div>
+
+          <ul>
+            <li>
+              <strong>Case α = 0 (Total Score Sₙ):</strong>
+              Exponent <span class="math-sym">1 − 2(0) = +1</span>. The variance grows linearly:
+              <span class="math-sym">Var(Sₙ) = n σ² = O(n)</span>. The standard deviation scales as
+              <span class="math-sym">SD(Sₙ) = σ √n</span>, creating a trumpet-shaped confidence funnel that widens
+              indefinitely. Individual trajectories diverge widely.
+            </li>
+            <li>
+              <strong>Case α = 1 (Average Score Sₙ/n):</strong>
+              Exponent <span class="math-sym">1 − 2(1) = −1</span>. The variance decays inversely:
+              <span class="math-sym">Var(Sₙ/n) = σ²/n = O(1/n)</span>. As <span class="math-sym">n → ∞</span>,
+              the variance vanishes to zero, forcing all sample paths to collapse onto the constant mean
+              <span class="math-sym">μ</span>.
+            </li>
+            <li>
+              <strong>Case α = 1/2 (Normalized Score Sₙ/√n):</strong>
+              Exponent <span class="math-sym">1 − 2(1/2) = 0</span>. The variance is completely invariant:
+              <span class="math-sym">Var(Sₙ/√n) = σ² = O(1)</span>. The scale of random fluctuations remains
+              perfectly stable across all horizons <span class="math-sym">n</span>, establishing the exact diffusive
+              balance required for the Central Limit Theorem.
+            </li>
+          </ul>
+        </article>
+
+        <!-- CARD 3: LAW OF LARGE NUMBERS -->
+        <article class="theory-card">
+          <div class="theory-badge-row">
+            <span class="theory-tag math">Convergence in Probability</span>
+            <span class="theory-tag stat">Chebyshev Bound</span>
+          </div>
+          <h3>3. Law of Large Numbers (LLN) & Convergence in Probability</h3>
+          <p>
+            The <strong>Weak Law of Large Numbers (WLLN)</strong> states that the empirical sample mean
+            <span class="math-sym">S̄ₙ = Sₙ/n</span> converges in probability to the theoretical expectation
+            <span class="math-sym">μ</span>:
+          </p>
+
+          <div class="math-block">
+            \forall ε > 0, \quad \lim_{n \to \infty} ℙ\left(\left|\frac{Sₙ}{n} - μ\right| \ge ε\right) = 0
+          </div>
+
+          <p>
+            This convergence can be rigorously bounded in finite samples using <strong>Chebyshev's Inequality</strong>:
+          </p>
+
+          <div class="math-block">
+            ℙ\left(\left|\frac{Sₙ}{n} - μ\right| \ge ε\right) \le \frac{Var(Sₙ/n)}{ε²} = \frac{σ²}{n ε²}
+          </div>
+
+          <p>
+            In our simulation console, we empirically verify this bound across all <span class="math-sym">m</span>
+            attackers at each step <span class="math-sym">k</span>. The empirical violation fraction
+            <span class="math-sym">P̂(|S̄ₖ − μ| ≥ ε)</span> remains strictly below the hyperbolic curve
+            <span class="math-sym">σ²/(k ε²)</span>, vanishing asymptotically to 0. Furthermore, by Kolmogorov's
+            Strong Law of Large Numbers, the convergence holds <em>almost surely</em>:
+            <span class="math-sym">ℙ(\lim_{n \to \infty} S̄ₙ = μ) = 1</span>.
+          </p>
+        </article>
+
+        <!-- CARD 4: CENTRAL LIMIT THEOREM -->
+        <article class="theory-card">
+          <div class="theory-badge-row">
+            <span class="theory-tag math">Convergence in Distribution</span>
+            <span class="theory-tag stat">Central Limit Theorem</span>
+          </div>
+          <h3>4. Central Limit Theorem & The Rademacher Invariance</h3>
+          <p>
+            The <strong>Lindeberg-Lévy Central Limit Theorem (CLT)</strong> dictates that the standardized sum of i.i.d.
+            finite-variance random variables converges in distribution to a standard Gaussian:
+          </p>
+
+          <div class="math-block">
+            Zₙ^* = \frac{Sₙ - n μ}{σ \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1) \quad \text{as } n \to \infty
+          </div>
+
+          <p>
+            Here lies the profound elegance of the <strong>Rademacher model</strong>:
+            Because <span class="math-sym">μ = 0</span> and <span class="math-sym">σ = 1</span>, the raw normalized total
+            score is <em>already identically equal</em> to the standardized variable:
+          </p>
+
+          <div class="math-block">
+            \frac{Sₙ}{\sqrt{n}} = \frac{Sₙ - n(0)}{1 \cdot \sqrt{n}} = Zₙ^* \xrightarrow{d} \mathcal{N}(0, 1)
+          </div>
+
+          <p>
+            In contrast, for the <strong>Bernoulli model</strong>, <span class="math-sym">Sₙ/√n = p√n + √{p(1−p)} Zₙ^*</span>.
+            The raw normalized score drifts towards <span class="math-sym">+∞</span> at rate <span class="math-sym">p√n</span>;
+            normality only emerges once the centering term <span class="math-sym">n μ</span> is subtracted.
+          </p>
+          <p>
+            Moreover, by the <strong>Berry-Esseen Theorem</strong>, the uniform convergence rate to normality is:
+          </p>
+          <div class="math-block">
+            \sup_{z \in \mathbb{R}} |Fₙ(z) - \Phi(z)| \le \frac{C \cdot E[|X - μ|³]}{σ³ \sqrt{n}}
+          </div>
+          <p>
+            In the Rademacher model, <span class="math-sym">E[|X|³] = 1</span> and the third central moment
+            <span class="math-sym">E[X³] = 0</span> (zero skewness). The absence of skewness eliminates the leading
+            asymmetric error term, causing Rademacher distributions to lock onto the Gaussian bell curve with remarkable
+            speed even for modest system counts <span class="math-sym">n ≈ 30</span>.
+          </p>
+        </article>
+
+      </div>
+
+      <!-- CYBERSECURITY RISK & ATTACKER COLLECTIVE CALLOUT -->
+      <div class="cyber-callout">
+        <h4>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Cybersecurity & Operational Risk Synthesis: System Size n vs Attacker Collective m
+        </h4>
+        <p>
+          The statistical behaviors revealed above directly inform enterprise defense sizing, threat modeling, and
+          incident response engineering:
+        </p>
+        <div style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div>
+            <strong style="color: var(--text-main);">1. System Horizon (n Targets) — Predictability of Density:</strong>
+            <p style="margin-top: 0.35rem; font-size: 0.88rem; color: var(--text-secondary);">
+              As an enterprise grows from <span class="math-sym">n = 50</span> to <span class="math-sym">n = 2000</span>
+              workstations, the absolute volume of successful breaches <span class="math-sym">Sₙ ≈ n p</span> escalates
+              linearly. Zero breaches is statistically impossible. However, the <em>per-system breach density</em>
+              <span class="math-sym">Sₙ/n → p</span> becomes almost entirely deterministic by the LLN.
+              Security executives can budget incident triage capacity based on the stable constant rate
+              <span class="math-sym">p</span> rather than erratic random spikes. In the Rademacher paradigm (where
+              honeypots inflict <span class="math-sym">−1</span> penalties), the expected breach balance is zero, but
+              diffusive drift <span class="math-sym">±√n</span> means large networks will still suffer severe transient
+              breach excursions that require automated quarantine.
+            </p>
+          </div>
+          <div>
+            <strong style="color: var(--text-main);">2. Attacker Collective (m Actors) — The Tyranny of Extreme Values:</strong>
+            <p style="margin-top: 0.35rem; font-size: 0.88rem; color: var(--text-secondary);">
+              In an attack ecosystem with <span class="math-sym">m</span> concurrent adversaries (e.g. automated botnets,
+              credential-stuffing campaigns), aggregate organizational exposure scales as
+              <span class="math-sym">T_{m,n} = ∑ⱼ Sₙ⁽ʲ⁾ = m n p</span>.
+              Crucially, <strong>cyber defenders are breached by the worst-case attacker, not the average attacker!</strong>
+              According to Extreme Value Theory (EVT), the maximum penetration score across <span class="math-sym">m</span>
+              adversaries scales as:
+              <br>
+              <span class="math-sym">E[\max_{1 \le j \le m} Sₙ⁽ʲ⁾] \approx n p + σ \sqrt{2 n \ln m}</span>.
+              <br>
+              Even if individual adversary capability is modest (<span class="math-sym">p = 0.15</span>), a collective
+              of <span class="math-sym">m = 3000</span> attackers guarantees that at least one adversary will achieve an
+              extreme multi-sigma penetration depth. Enterprise defense must therefore architect for tail percentiles
+              (99.9th percentile threat actors) via Zero-Trust microsegmentation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- APP FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>HMWK 4 — Stochastic Penetration Dynamics Lab</strong></p>
+        <p>Coursework in Statistics & Cryptographic Foundations | Investigating LLN, Variance Trichotomy & CLT</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#lab">Simulation Lab</a>
+        <a href="#trajectories">Trajectories</a>
+        <a href="#variance">Variance Scaling</a>
+        <a href="#theory">Theoretical Synthesis</a>
+        <a href="../HMWK1/index.html">HMWK 1: Elliptic Curves</a>
+        <a href="../HMWK2/index.html">HMWK 2: Ethereum Keys</a>
+        <a href="../HMWK3/index.html">HMWK 3: Cryptanalysis Hub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+
+</html>
