@@ -18,11 +18,20 @@ The core update logic requires only about 3 lines:
     delta = x - mean
     mean += delta / count
     M2 += delta * (x - mean)
+
+Hacker Penetration Experiment:
+-----------------------------
+Simulates m hackers penetrating n systems. Each penetration attempt receives a score
+in [0, 10] drawn from a fixed probability distribution with theoretical mean mu and
+variance sigma^2.
+Tracks per-hacker sample mean and sample variance via Welford's algorithm, compares
+averages across hackers to mu and sigma^2, and evaluates the O(1/n) variability decay.
 """
 
 import math
+import random
 import statistics
-from typing import Iterable, Tuple, Optional
+from typing import Iterable, Tuple, List, Dict, Optional
 
 
 def welford_core_example(data: Iterable[float]) -> Tuple[float, float, float, float]:
@@ -160,8 +169,209 @@ def naive_one_pass_variance(data: Iterable[float]) -> Tuple[float, float, float]
     return mean, sample_var, ss
 
 
+# ==============================================================================
+# HACKER PENETRATION DYNAMICS & SAMPLING DISTRIBUTION EXPERIMENT
+# ==============================================================================
+
+class PenetrationDistribution:
+    """
+    Represents a probability distribution generating scores in [0, 10].
+    Provides exact theoretical mean mu, variance sigma^2, and 4th moment mu_4.
+    """
+    def __init__(self, name: str, **kwargs):
+        self.name = name
+        self.params = kwargs
+
+        if name == "binomial":
+            # X ~ Binomial(N=10, p)
+            self.N = kwargs.get("N", 10)
+            self.p = kwargs.get("p", 0.4)
+            self.mu = self.N * self.p
+            self.var = self.N * self.p * (1.0 - self.p)
+            # 4th central moment of Binomial: N*p*(1-p)*(1 + (3N-6)*p*(1-p))
+            pq = self.p * (1.0 - self.p)
+            self.mu4 = self.N * pq * (1.0 + (3 * self.N - 6) * pq)
+            self.desc = f"Discrete Binomial(N={self.N}, p={self.p})"
+
+        elif name == "uniform":
+            # X ~ Continuous Uniform(a=0, b=10)
+            self.a = kwargs.get("a", 0.0)
+            self.b = kwargs.get("b", 10.0)
+            self.mu = (self.a + self.b) / 2.0
+            self.var = ((self.b - self.a) ** 2) / 12.0
+            # 4th central moment of Uniform: (b-a)^4 / 80
+            self.mu4 = ((self.b - self.a) ** 4) / 80.0
+            self.desc = f"Continuous Uniform({self.a}, {self.b})"
+
+        elif name == "discrete_uniform":
+            # X in {0, 1, ..., 10}
+            self.k_max = kwargs.get("k_max", 10)
+            self.mu = self.k_max / 2.0
+            # Var of discrete uniform on {0..K}: K*(K+2)/12
+            self.var = (self.k_max * (self.k_max + 2)) / 12.0
+            # Approx 4th moment
+            self.mu4 = sum(((x - self.mu) ** 4) / (self.k_max + 1) for x in range(self.k_max + 1))
+            self.desc = f"Discrete Uniform 0..{self.k_max}"
+
+        else:
+            raise ValueError(f"Unknown distribution: {name}")
+
+    def sample(self) -> float:
+        """Sample a single score in [0, 10]."""
+        if self.name == "binomial":
+            return float(sum(1 for _ in range(self.N) if random.random() < self.p))
+        elif self.name == "uniform":
+            return random.uniform(self.a, self.b)
+        elif self.name == "discrete_uniform":
+            return float(random.randint(0, self.k_max))
+        return 0.0
+
+
+def simulate_hacker_penetration(
+    m_hackers: int = 1000,
+    n_systems_list: Optional[List[int]] = None,
+    dist_name: str = "binomial",
+    dist_kwargs: Optional[dict] = None,
+    seed: int = 42,
+) -> Dict[str, any]:
+    """
+    Simulates m hackers attempting to penetrate n systems.
+    Each hacker generates a trajectory of n scores in [0, 10].
+    Welford's recurrence formulas track sampling mean and sampling variance online.
+
+    Returns summary metrics across varying n.
+    """
+    if n_systems_list is None:
+        n_systems_list = [10, 25, 50, 100, 250, 500, 1000]
+
+    random.seed(seed)
+    dist = PenetrationDistribution(dist_name, **(dist_kwargs or {}))
+
+    results_by_n = []
+
+    for n in n_systems_list:
+        hacker_means = []
+        hacker_vars = []
+        hacker_pop_vars = []  # Biased estimator: M2 / n
+
+        for _ in range(m_hackers):
+            # For each hacker, run Welford's 3-line recurrence online
+            count = 0
+            mean = 0.0
+            M2 = 0.0
+
+            for _ in range(n):
+                x = dist.sample()
+                count += 1
+                # --- Welford 3-line recurrence ---
+                delta = x - mean
+                mean += delta / count
+                M2 += delta * (x - mean)
+                # ---------------------------------
+
+            hacker_means.append(mean)
+            hacker_vars.append(M2 / (count - 1))      # Unbiased s^2
+            hacker_pop_vars.append(M2 / count)        # Uncorrected biased sigma^2
+
+        # Aggregate across all m hackers:
+        avg_mean = statistics.mean(hacker_means)
+        avg_var = statistics.mean(hacker_vars)
+        avg_pop_var = statistics.mean(hacker_pop_vars)
+
+        # Variances across the m hackers (variability of the estimators):
+        var_of_means = statistics.variance(hacker_means)
+        var_of_vars = statistics.variance(hacker_vars)
+
+        # Theoretical predicted variability:
+        # Var(x_bar) = sigma^2 / n
+        th_var_of_means = dist.var / n
+        # Var(s^2) = (1/n) * (mu_4 - (n-3)/(n-1) * sigma^4)
+        th_var_of_vars = (1.0 / n) * (dist.mu4 - ((n - 3) / (n - 1)) * (dist.var ** 2)) if n > 1 else 0.0
+
+        results_by_n.append({
+            "n": n,
+            "avg_mean": avg_mean,
+            "err_mean": abs(avg_mean - dist.mu),
+            "avg_var": avg_var,
+            "err_var": abs(avg_var - dist.var),
+            "avg_pop_var": avg_pop_var,
+            "biased_factor": avg_pop_var / dist.var,  # Expected (n-1)/n
+            "var_of_means": var_of_means,
+            "th_var_of_means": th_var_of_means,
+            "var_of_vars": var_of_vars,
+            "th_var_of_vars": th_var_of_vars,
+            "scaling_ratio_mean": var_of_means / (dist.var / n),
+        })
+
+    return {
+        "m_hackers": m_hackers,
+        "distribution": dist,
+        "results": results_by_n,
+    }
+
+
+def print_penetration_experiment_report(sim_data: Dict[str, any]):
+    """Prints a clear, publication-quality report of the penetration experiment."""
+    dist = sim_data["distribution"]
+    m = sim_data["m_hackers"]
+    results = sim_data["results"]
+
+    print("\n" + "=" * 90)
+    print(f"HACKER PENETRATION STATISTICAL EXPERIMENT (m = {m} Hackers)")
+    print(f"Distribution: {dist.desc} | Domain: [0, 10]")
+    print(f"Theoretical Parameters: μ = {dist.mu:.4f} | σ² = {dist.var:.4f}")
+    print("=" * 90)
+
+    # 1. Unbiasedness Table
+    print("\n[PART 1] EMPIRICAL CONVERGENCE TO THEORETICAL PARAMETERS (Unbiasedness)")
+    print(f"{'n (Systems)':<12} | {'Avg Mean x̄':<14} | {'|x̄ - μ|':<10} | {'Avg Var s²':<14} | {'|s² - σ²|':<10} | {'Bessel Bias ((n-1)/n)':<22}")
+    print("-" * 90)
+    for r in results:
+        bessel_expected = (r['n'] - 1) / r['n']
+        print(
+            f"{r['n']:<12d} | "
+            f"{r['avg_mean']:<14.5f} | "
+            f"{r['err_mean']:<10.5f} | "
+            f"{r['avg_var']:<14.5f} | "
+            f"{r['err_var']:<10.5f} | "
+            f"pop_var/σ²={r['avg_pop_var']/dist.var:.4f} (th={bessel_expected:.4f})"
+        )
+
+    # 2. Variability Scaling Table
+    print("\n[PART 2] VARIABILITY OF ESTIMATORS ACROSS HACKERS VS SYSTEM SIZE n")
+    print(f"{'n':<6} | {'Var(x̄) Empirical':<18} | {'Var(x̄) Theoretical (σ²/n)':<26} | {'Var(s²) Empirical':<18} | {'Var(s²) Theory':<16}")
+    print("-" * 90)
+    for r in results:
+        print(
+            f"{r['n']:<6d} | "
+            f"{r['var_of_means']:<18.6f} | "
+            f"{r['th_var_of_means']:<26.6f} | "
+            f"{r['var_of_vars']:<18.6f} | "
+            f"{r['th_var_of_vars']:<16.6f}"
+        )
+
+    print("\n" + "=" * 90)
+    print("THEORETICAL SYNTHESIS & INFERENTIAL CONCLUSIONS:")
+    print("=" * 90)
+    print("1. UNBIASEDNESS (Law of Large Numbers across m hackers):")
+    print(f"   • As m -> ∞, average sampling mean converges exactly to μ = {dist.mu:.4f}.")
+    print(f"   • Average sample variance s² (with n-1 divisor) converges exactly to σ² = {dist.var:.4f}.")
+    print("   • Without Bessel's correction (using n divisor), variance is underestimated by (n-1)/n.")
+    print("\n2. INFERENTIAL UTILITY (Single-Sample Reality):")
+    print("   • In real-world security audits, we only observe ONE hacker's trajectory (one sample of size n).")
+    print("   • Unbiasedness guarantees our estimates of target system difficulty (mean) and vulnerability")
+    print("     dispersion (variance) have zero systematic skew.")
+    print("   • By the Central Limit Theorem, x̄ ~ N(μ, s²/n), allowing rigorous confidence intervals and hypothesis tests.")
+    print("\n3. ASYMPTOTIC VARIABILITY SCALING WITH n:")
+    print("   • Var(x̄) = σ² / n  ==> Sampling mean variability shrinks strictly at rate O(1/n).")
+    print("   • Var(s²) ≈ (μ₄ - σ⁴) / n ==> Sampling variance variability also shrinks at rate O(1/n).")
+    print("   • Doubling the number of tested systems n halves the variance of both estimators,")
+    print("     yielding substantially sharper, tighter inference about system resilience.")
+    print("=" * 90)
+
+
 def run_tests_and_demonstrations():
-    """Run verification tests and numerical stability benchmarks."""
+    """Run verification tests, numerical stability benchmarks, and hacker experiment."""
     print("=" * 72)
     print("WELFORD'S RECURRENCE ALGORITHM FOR ONLINE MEAN & VARIANCE")
     print("=" * 72)
@@ -233,9 +443,14 @@ def run_tests_and_demonstrations():
     assert math.isclose(acc1.variance, expected_combined_var), "Merge variance mismatch!"
     print("  ✓ Parallel accumulator merge PASSED!")
 
-    print("\n" + "=" * 72)
-    print("ALL TESTS COMPLETED SUCCESSFULLY!")
-    print("=" * 72)
+    # 4. Hacker Penetration Experiment
+    sim_data = simulate_hacker_penetration(
+        m_hackers=1000,
+        n_systems_list=[10, 25, 50, 100, 250, 500, 1000],
+        dist_name="binomial",
+        seed=42
+    )
+    print_penetration_experiment_report(sim_data)
 
 
 if __name__ == "__main__":

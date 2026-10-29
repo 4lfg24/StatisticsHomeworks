@@ -47,6 +47,8 @@
         <a href="#core-code" class="nav-link">3-Line Logic</a>
         <a href="#lab" class="nav-link">Streaming Lab</a>
         <a href="#benchmark" class="nav-link">Catastrophic Cancellation</a>
+        <a href="#hacker-lab" class="nav-link">Hacker Penetration Lab</a>
+        <a href="#derivation" class="nav-link">Mathematical Derivation</a>
         <a href="../index.html" class="nav-link">← Hub</a>
       </nav>
     </div>
@@ -59,13 +61,14 @@
     <section class="hero-section">
       <div class="hero-badge">Coursework in Statistics & Scientific Computing</div>
       <h2 class="hero-title">
-        Welford’s Recurrence Formulas for
-        <span class="gradient-text">Online Mean, SS & Variance</span>
+        Welford’s Recurrence Formulas &
+        <span class="gradient-text">Hacker Penetration Dynamics</span>
       </h2>
       <p class="hero-desc">
         Deriving B. P. Welford's (1962) one-pass recurrence formulas for the Sum of Squares (<span class="math-sym">SS</span>)
         and Variance (<span class="math-sym">s²</span>, <span class="math-sym">σ²</span>), following Donald Knuth's incremental
-        approach for the mean. Featuring a Python implementation whose core update logic requires only <strong>3 lines</strong>.
+        mean recurrence. Exploring multi-attacker penetration dynamics across <span class="math-sym">m</span> hackers and
+        <span class="math-sym">n</span> target systems, verifying unbiasedness and asymptotic <span class="math-sym">O(1/n)</span> variance scaling.
       </p>
     </section>
 
@@ -105,7 +108,7 @@
         <div class="section-tag">Interactive Simulation</div>
         <h3 class="section-title">Live Online Stream Accumulator</h3>
         <p class="section-desc">
-          Add single values or load preset streams to watch the 3-line recurrence update the running statistics in real time.
+          Add single values or load preset streams to watch the 3-line recurrence update running statistics in real time.
         </p>
       </div>
 
@@ -256,6 +259,182 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MULTI-HACKER PENETRATION EXPERIMENT SECTION -->
+    <section id="hacker-lab" class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">Multi-Agent Stochastic Penetration</div>
+        <h3 class="section-title">Hacker Penetration Experiment ($m$ Hackers $\times$ $n$ Systems)</h3>
+        <p class="section-desc">
+          Each hacker attempts $n$ systems, scoring $X \in [0, 10]$ per system from a fixed probability distribution with theoretical mean $\mu$ and variance $\sigma^2$.
+          Welford’s online formulas compute individual sampling means and variances. We analyze cohort averages, Bessel's bias factor, and $O(1/n)$ variance compression.
+        </p>
+      </div>
+
+      <!-- Controls Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; background: rgba(10, 14, 23, 0.6); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
+        <div class="controls-group">
+          <span class="control-label">Score Distribution on [0, 10]</span>
+          <select id="hacker-dist-select" class="text-input" style="cursor: pointer;">
+            <option value="binomial" selected>Discrete Binomial(N=10, p=0.4) [μ=4.0, σ²=2.4]</option>
+            <option value="uniform">Continuous Uniform(0, 10) [μ=5.0, σ²=8.333]</option>
+            <option value="discrete_uniform">Discrete Uniform 0..10 [μ=5.0, σ²=10.0]</option>
+          </select>
+        </div>
+
+        <div class="controls-group">
+          <span class="control-label">Hackers Cohort Size ($m$): <strong id="m-display" style="color: var(--indigo-light);">500</strong></span>
+          <input type="range" id="m-slider" class="range-slider" min="50" max="1500" step="50" value="500">
+        </div>
+
+        <div class="controls-group">
+          <span class="control-label">Systems per Hacker ($n$): <strong id="n-display" style="color: var(--cyan-light);">100</strong></span>
+          <input type="range" id="n-slider" class="range-slider" min="5" max="500" step="5" value="100">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
+          <button id="btn-run-hacker-sim" class="btn" style="flex: 1;">Run Simulation ($m \times n$)</button>
+          <button id="btn-run-n-sweep" class="btn btn-secondary" style="flex: 1;">Run $n$-Sweep Benchmark</button>
+        </div>
+      </div>
+
+      <!-- Comparison Metrics Cards -->
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 2rem;">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Theoretical μ</span>
+            <span class="metric-formula">E[X]</span>
+          </div>
+          <div id="hm-th-mu" class="metric-value indigo">4.0000</div>
+          <div style="font-size: 0.75rem; color: var(--text-dim);">Exact population mean</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Avg Sample Mean (x̄̄)</span>
+            <span class="metric-formula">(1/m) ∑ x̄⁽ʲ⁾</span>
+          </div>
+          <div id="hm-avg-mean" class="metric-value emerald">4.0000</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Error: <strong id="hm-err-mean" style="color: var(--emerald-light); font-family: var(--font-mono);">0.0000</strong></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Theoretical σ²</span>
+            <span class="metric-formula">Var(X)</span>
+          </div>
+          <div id="hm-th-var" class="metric-value amber">2.4000</div>
+          <div style="font-size: 0.75rem; color: var(--text-dim);">Exact population variance</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Avg Sample Var (s̄²)</span>
+            <span class="metric-formula">(1/m) ∑ s²⁽ʲ⁾</span>
+          </div>
+          <div id="hm-avg-var" class="metric-value cyan">2.4000</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Error: <strong id="hm-err-var" style="color: var(--cyan-light); font-family: var(--font-mono);">0.0000</strong></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Var of Means Var(x̄)</span>
+            <span class="metric-formula">Empirical vs σ²/n</span>
+          </div>
+          <div id="hm-var-means" class="metric-value">0.0240</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Theory: <span id="hm-th-var-means" style="font-family: var(--font-mono);">0.0240</span></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Var of Variances Var(s²)</span>
+            <span class="metric-formula">Estimator Dispersion</span>
+          </div>
+          <div id="hm-var-vars" class="metric-value">0.1050</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Decays as <strong style="color: var(--indigo-light); font-family: var(--font-mono);">O(1/n)</strong></div>
+        </div>
+      </div>
+
+      <!-- Canvases: Trajectories & Sampling Distribution -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: rgba(10, 14, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="control-label" style="color: #fff;">Hacker Running Mean Paths (First 30 Hackers)</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">x̄_k vs Systems k ∈ [1, n]</span>
+          </div>
+          <canvas id="canvas-trajectories" width="600" height="260" style="width: 100%; height: 260px; background: #050811; border-radius: var(--radius-md);"></canvas>
+        </div>
+
+        <div style="background: rgba(10, 14, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="control-label" style="color: #fff;">Sampling Distribution of Means across m Hackers</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">x̄ ~ N(μ, σ²/n)</span>
+          </div>
+          <canvas id="canvas-histogram" width="600" height="260" style="width: 100%; height: 260px; background: #050811; border-radius: var(--radius-md);"></canvas>
+        </div>
+      </div>
+
+      <!-- Asymptotic n-Sweep Benchmark Table -->
+      <div style="margin-bottom: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span class="control-label" style="color: #fff;">Asymptotic n-Sweep Empirical Benchmark Table ($m = 500$)</span>
+          <span style="font-size: 0.78rem; color: var(--indigo-light); font-family: var(--font-mono);">Proving O(1/n) Variance Scaling</span>
+        </div>
+        <div class="stream-history-box" style="max-height: 320px;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>n (Systems)</th>
+                <th>Avg Mean (x̄̄)</th>
+                <th>|x̄̄ - μ|</th>
+                <th>Avg Var (s̄²)</th>
+                <th>|s̄² - σ²|</th>
+                <th>Var(x̄) Empirical</th>
+                <th>Var(x̄) Theory (σ²/n)</th>
+                <th>Var(s²) Empirical</th>
+                <th>Scaling Ratio n·Var(x̄)/σ²</th>
+              </tr>
+            </thead>
+            <tbody id="n-sweep-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Theoretical Synthesis & Core Questions Answered -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--indigo-light); margin-bottom: 0.6rem;">
+            1. Conclusions from Comparisons
+          </h4>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Unbiasedness via LLN:</strong> The average sample mean $\bar{\bar{X}}$ and average sample variance $\bar{S}^2$ converge exactly to the true population parameters $\mu$ and $\sigma^2$ as $m \to \infty$.<br>
+            <strong>Bessel's Correction:</strong> Computing variance with divisor $n-1$ guarantees $E[S^2] = \sigma^2$. Using $n$ underestimates variance by $(n-1)/n$.
+          </p>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-emerald); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--emerald-light); margin-bottom: 0.6rem;">
+            2. Inferential Statistics Utility
+          </h4>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>The Single-Sample Reality:</strong> In real security audits, we only observe <em>one hacker trajectory</em> ($m=1$). Unbiasedness guarantees our estimate has zero systematic skew.<br>
+            <strong>Confidence Intervals & CLT:</strong> With $S_n^2$ unbiased, the standard error $S_n / \sqrt{n}$ enables rigorous confidence intervals $\bar{X} \pm t_{\alpha/2}\frac{S_n}{\sqrt{n}}$ and hypothesis testing.
+          </p>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--cyan-light); margin-bottom: 0.6rem;">
+            3. Effect of Increasing $n$
+          </h4>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Strict $O(1/n)$ Decay:</strong> The variability of sample means shrinks as $\operatorname{Var}(\bar{X}_n) = \sigma^2/n$, and sample variance variability shrinks as $\operatorname{Var}(S_n^2) = O(1/n)$.<br>
+            <strong>Variance Compression:</strong> Increasing $n$ does not shift the expected values ($\mu$ and $\sigma^2$), but compresses estimator dispersion by $1/n$, yielding sharp, definitive assessments.
+          </p>
         </div>
       </div>
     </section>
