@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics & Cryptography Research Suite | Homeworks Portal</title>
+  <meta name="description"
+    content="Unified portal for coursework in Statistics and Cryptography. Interactive laboratories exploring Elliptic-Curve Cryptography, Ethereum Wallet Key Derivation, Statistical Cryptanalysis, and Stochastic Penetration Processes (LLN & CLT).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="HMWK3/home.css">
+  <style>
+    /* Specific enhancements for Root Master Hub */
+    .master-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.95rem;
+      border-radius: var(--radius-full);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid var(--border-accent);
+      color: var(--indigo-light);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .hw-badge-num {
+      padding: 0.2rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+    .badge-hw1 { background: rgba(99, 102, 241, 0.2); color: var(--indigo-light); border: 1px solid rgba(99, 102, 241, 0.4); }
+    .badge-hw2 { background: rgba(16, 185, 129, 0.2); color: var(--emerald-light); border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-hw3 { background: rgba(139, 92, 246, 0.2); color: var(--violet-light); border: 1px solid rgba(139, 92, 246, 0.4); }
+    .badge-hw4 { background: rgba(6, 182, 212, 0.2); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.75rem;
+      margin-top: 2rem;
+    }
+
+    .hub-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .hub-card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(99, 102, 241, 0.2);
+    }
+
+    .hub-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .card-hw1::before { background: linear-gradient(90deg, var(--indigo) 0%, var(--cyan) 100%); }
+    .card-hw2::before { background: linear-gradient(90deg, var(--emerald) 0%, var(--cyan) 100%); }
+    .card-hw3::before { background: linear-gradient(90deg, var(--violet) 0%, var(--rose) 100%); }
+    .card-hw4::before { background: linear-gradient(90deg, var(--cyan) 0%, var(--indigo) 100%); }
+
+    .hub-card-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .hub-card-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0.85rem 0 0.5rem;
+      line-height: 1.3;
+    }
+
+    .hub-card-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+
+    .hub-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hub-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-xs);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hub-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--indigo-light);
+    }
+
+    .hub-card:hover .hub-card-footer {
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Ambient Glow Background -->
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="main-title">Statistics Coursework Portal</h1>
+          <p class="subtitle">Computational Laboratories & Cryptographic Foundations</p>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <a href="HMWK1/index.html" class="nav-pill">HMWK 1</a>
+        <a href="HMWK2/index.html" class="nav-pill">HMWK 2</a>
+        <a href="HMWK3/index.html" class="nav-pill">HMWK 3</a>
+        <a href="HMWK4/index.html" class="nav-pill active">HMWK 4</a>
+        <a href="https://github.com/4lfg24/StatisticsHomeworks" target="_blank" rel="noopener" class="nav-pill external">GitHub Repo ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="master-badge">
+        <span>Coursework Suite</span>
+        <span>•</span>
+        <span>Statistics & Applied Cryptography</span>
+      </div>
+      <h1 class="hero-title">
+        Computational Laboratories: <br>
+        <span class="gradient-text">Statistics, Cryptography & Limit Theorems</span>
+      </h1>
+      <p class="hero-subtitle">
+        An interactive research repository exploring the mathematical intersections of elliptic-curve cryptography,
+        hierarchical key derivation, statistical cryptanalysis, and stochastic penetration processes governed by the Law
+        of Large Numbers and the Central Limit Theorem.
+      </p>
+    </section>
+
+    <!-- 4 HOMEWORKS GRID -->
+    <section class="hub-grid">
+
+      <!-- HMWK 1 -->
+      <a href="HMWK1/index.html" class="hub-card card-hw1">
+        <div>
+          <div class="hub-card-header">
+            <span class="hw-badge-num badge-hw1">Homework 1</span>
+          </div>
+          <h2 class="hub-card-title">Elliptic-Curve Scalar Multiplication Lab</h2>
+          <p class="hub-card-desc">
+            Visualizing public-key generation (<span class="code-pill">Q = kG</span>) on secp256k1 over the real plane
+            <span class="code-pill">ℝ</span> and the finite field <span class="code-pill">𝔽₁₇</span>. Implementation of the
+            logarithmic Double-and-Add algorithm and empirical statistical exploration of the Avalanche Criterion.
+          </p>
+          <div class="hub-card-tags">
+            <span class="hub-tag">secp256k1</span>
+            <span class="hub-tag">Double-and-Add</span>
+            <span class="hub-tag">Avalanche Criterion</span>
+            <span class="hub-tag">Finite Fields</span>
+          </div>
+        </div>
+        <div class="hub-card-footer">
+          <span>Explore HMWK 1 Lab</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- HMWK 2 -->
+      <a href="HMWK2/index.html" class="hub-card card-hw2">
+        <div>
+          <div class="hub-card-header">
+            <span class="hw-badge-num badge-hw2">Homework 2</span>
+          </div>
+          <h2 class="hub-card-title">Ethereum Wallet Cryptographic Pipeline</h2>
+          <p class="hub-card-desc">
+            End-to-end cryptographic pipeline from 12-word BIP-39 mnemonic seed phrases to BIP-32/BIP-44 Hierarchical
+            Deterministic (HD) key trees, secp256k1 point derivation, Keccak-256 hashing, EIP-55 checksumming, and
+            statistical uniformity verification.
+          </p>
+          <div class="hub-card-tags">
+            <span class="hub-tag">BIP-39 / BIP-32</span>
+            <span class="hub-tag">Keccak-256</span>
+            <span class="hub-tag">EIP-55</span>
+            <span class="hub-tag">HD Wallets</span>
+          </div>
+        </div>
+        <div class="hub-card-footer">
+          <span>Explore HMWK 2 Pipeline</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- HMWK 3 -->
+      <a href="HMWK3/index.html" class="hub-card card-hw3">
+        <div>
+          <div class="hub-card-header">
+            <span class="hw-badge-num badge-hw3">Homework 3</span>
+          </div>
+          <h2 class="hub-card-title">Cryptographic Foundations & Statistical Cryptanalysis</h2>
+          <p class="hub-card-desc">
+            A three-task unified research suite: Dual Encryption comparing the Caesar Cipher with toy secp256k1, Automated
+            Frequency Cryptanalysis using the Chi-Squared (<span class="code-pill">χ²</span>) test, and Restricted-Keyspace
+            ECDLP recovery via BSGS and Pollard's Rho.
+          </p>
+          <div class="hub-card-tags">
+            <span class="hub-tag">Caesar Cipher</span>
+            <span class="hub-tag">Chi-Squared χ²</span>
+            <span class="hub-tag">BSGS & Pollard's Rho</span>
+            <span class="hub-tag">ECDLP Hardness</span>
+          </div>
+        </div>
+        <div class="hub-card-footer">
+          <span>Explore HMWK 3 Suite</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- HMWK 4 -->
+      <a href="HMWK4/index.html" class="hub-card card-hw4">
+        <div>
+          <div class="hub-card-header">
+            <span class="hw-badge-num badge-hw4">Homework 4</span>
+          </div>
+          <h2 class="hub-card-title">Stochastic Penetration Dynamics: LLN & CLT</h2>
+          <p class="hub-card-desc">
+            Modeling multi-attacker intrusion processes across <span class="code-pill">n</span> systems and
+            <span class="code-pill">m</span> attackers. Tracing the variance trichotomy across Total (<span class="code-pill">Sₙ</span>),
+            Average (<span class="code-pill">Sₙ/n</span>), and Diffusive (<span class="code-pill">Sₙ/√n</span>) normalizations,
+            validating LLN convergence in probability and Rademacher CLT Gaussian limits.
+          </p>
+          <div class="hub-card-tags">
+            <span class="hub-tag">Rademacher & Bernoulli</span>
+            <span class="hub-tag">Variance Trichotomy</span>
+            <span class="hub-tag">Law of Large Numbers</span>
+            <span class="hub-tag">Central Limit Theorem</span>
+          </div>
+        </div>
+        <div class="hub-card-footer">
+          <span>Explore HMWK 4 Lab</span>
+          <span>→</span>
+        </div>
+      </a>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <p><strong>Statistics & Cryptography Coursework Suite</strong></p>
+        <p>GitHub Repository: <a href="https://github.com/4lfg24/StatisticsHomeworks" target="_blank" rel="noopener">4lfg24/StatisticsHomeworks</a></p>
+      </div>
+      <div class="footer-links">
+        <a href="HMWK1/index.html">HMWK 1</a>
+        <a href="HMWK2/index.html">HMWK 2</a>
+        <a href="HMWK3/index.html">HMWK 3</a>
+        <a href="HMWK4/index.html">HMWK 4</a>
+        <a href="https://github.com/4lfg24/StatisticsHomeworks" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
